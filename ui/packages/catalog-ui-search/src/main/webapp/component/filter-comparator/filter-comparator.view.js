@@ -99,7 +99,11 @@ module.exports = Marionette.ItemView.extend({
             return comparator !== 'NEAR'
           })
         }
+<<<<<<< HEAD
         if (this.model.get('type') === 'anyText') {
+=======
+        if(this.model.get('type') === 'anyText'){
+>>>>>>> b49da09f81... AnyText searches no longer contain empty operator
           return stringComparatorsAnyText
         }
         return stringComparators

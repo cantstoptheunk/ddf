@@ -350,30 +350,8 @@ module.exports = Marionette.LayoutView.extend({
         value.distance,
         value.value,
       ])
-<<<<<<< HEAD
     } else if (comparator === 'EMPTY') {
       return CQLUtils.generateFilter(type, property, null)
-=======
-    }
-    // else if(comparator === 'EMPTY'){
-    //   return {
-    //     type: 'OR',
-    //     filters: {
-    //       type: ["=", "IS NULL"],
-    //       property: [property, property],
-    //       value: ["\"\"", null]
-    //     }
-    //   }
-    // } 
-    else if(comparator === 'EMPTY'){
-      return {
-        type: 'OR',
-        filters: [
-          CQLUtils.generateFilter('=', property, "\"\""),
-          CQLUtils.generateFilter(type, property, null)
-        ]
-      }
->>>>>>> c19a161949... ausQuery: EMPTY search now deletes the text input area
     }
     if (metacardDefinitions.metacardTypes[this.model.get('type')].multivalued) {
       return {
