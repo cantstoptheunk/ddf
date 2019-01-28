@@ -22,8 +22,14 @@ const metacardDefinitions = require('../singletons/metacard-definitions.js')
 
 var geometryComparators = ['INTERSECTS']
 var dateComparators = ['BEFORE', 'AFTER', 'RELATIVE', 'BETWEEN']
+<<<<<<< HEAD
 var stringComparators = ['CONTAINS', 'MATCHCASE', '=', 'NEAR']
 var numberComparators = ['>', '<', '=', '>=', '<=']
+=======
+var stringComparators = ['CONTAINS', 'MATCHCASE', '=', 'NEAR', 'EMPTY']
+var stringComparatorsAnyText = ['CONTAINS', 'MATCHCASE', '=', 'NEAR']
+var numberComparators = ['>', '<', '=', '>=', '<=', 'EMPTY']
+>>>>>>> b49da09f81... AnyText searches no longer contain empty operator
 var booleanComparators = ['=']
 
 module.exports = Marionette.ItemView.extend({
@@ -93,6 +99,9 @@ module.exports = Marionette.ItemView.extend({
           return stringComparators.filter(function(comparator) {
             return comparator !== 'NEAR'
           })
+        }
+        if(this.model.get('type') === 'anyText'){
+          return stringComparatorsAnyText
         }
         return stringComparators
     }
