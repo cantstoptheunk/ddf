@@ -229,12 +229,18 @@ module.exports = Marionette.LayoutView.extend({
   toggleDateClass: function(toggle) {
     this.$el.toggleClass('is-date', toggle)
   },
+<<<<<<< HEAD
   toggleSearchInputClass: function(toggle) {
     this.$el.toggleClass('if-editing', toggle)
   },
   toggleViewingClass: function(toggle) {
     this.$el.toggleClass('if-viewing', toggle)
   },
+=======
+  toggleSearchInputClass: function(toggle){
+    this.$el.toggleClass('if-editing', toggle)
+  },
+>>>>>>> 65b119f54e... Adding EMPTY operator to numerical, date, and location attributes
   setDefaultComparator: function(propertyJSON) {
     this.toggleLocationClass(false)
     this.toggleDateClass(false)
@@ -349,7 +355,12 @@ module.exports = Marionette.LayoutView.extend({
         value.distance,
         value.value,
       ])
+<<<<<<< HEAD
     } else if (comparator === 'EMPTY') {
+=======
+    }
+    else if(comparator === 'EMPTY'){
+>>>>>>> 65b119f54e... Adding EMPTY operator to numerical, date, and location attributes
       return CQLUtils.generateFilter(type, property, null)
     }
     if (metacardDefinitions.metacardTypes[this.model.get('type')].multivalued) {
