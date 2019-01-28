@@ -20,9 +20,14 @@ const template = require('./filter-comparator.hbs')
 const CustomElements = require('../../js/CustomElements.js')
 const metacardDefinitions = require('../singletons/metacard-definitions.js')
 
+<<<<<<< HEAD
 var geometryComparators = ['INTERSECTS', 'EMPTY']
 var geometryComparatorsAnyGeo = ['INTERSECTS']
 var dateComparators = ['BEFORE', 'AFTER', 'RELATIVE', 'BETWEEN', 'EMPTY']
+=======
+var geometryComparators = ['INTERSECTS']
+var dateComparators = ['BEFORE', 'AFTER', 'RELATIVE', 'BETWEEN']
+>>>>>>> b49da09f81... AnyText searches no longer contain empty operator
 var stringComparators = ['CONTAINS', 'MATCHCASE', '=', 'NEAR', 'EMPTY']
 var stringComparatorsAnyText = ['CONTAINS', 'MATCHCASE', '=', 'NEAR']
 var numberComparators = ['>', '<', '=', '>=', '<=', 'EMPTY']
@@ -96,7 +101,11 @@ module.exports = Marionette.ItemView.extend({
             return comparator !== 'NEAR'
           })
         }
+<<<<<<< HEAD
         if (this.model.get('type') === 'anyText') {
+=======
+        if(this.model.get('type') === 'anyText'){
+>>>>>>> b49da09f81... AnyText searches no longer contain empty operator
           return stringComparatorsAnyText
         }
         return stringComparators
