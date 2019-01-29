@@ -70,11 +70,19 @@ function bboxToCQLPolygon(model) {
 }
 
 function generateAnyGeoFilter(property, model) {
+<<<<<<< HEAD
   if (model === null) {
     return {
       type: 'IS NULL',
       property,
       value: null,
+=======
+  if(model === null){
+    return {
+      type: 'IS NULL',
+      property,
+      value: null
+>>>>>>> 84748cd1bc... Empty Operator search works for all types except Geo
     }
   }
   switch (model.type) {
