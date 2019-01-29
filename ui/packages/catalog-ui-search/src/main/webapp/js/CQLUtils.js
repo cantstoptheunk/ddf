@@ -70,11 +70,19 @@ function bboxToCQLPolygon(model) {
 }
 
 function generateAnyGeoFilter(property, model) {
+<<<<<<< HEAD
   if (model === null) {
     return {
       type: 'IS NULL',
       property,
       value: null,
+=======
+  if(model === null){
+    return {
+      type: 'IS NULL',
+      property,
+      value: null
+>>>>>>> 84748cd1bc... Empty Operator search works for all types except Geo
     }
   }
   switch (model.type) {
@@ -270,7 +278,6 @@ function transformFilterToCQL(filter) {
   let simp = cql.simplify(read)
   write = cql.write(simp)
   console.log(write)
-<<<<<<< HEAD
   return this.sanitizeGeometryCql(
     '(' + cql.write(cql.simplify(cql.read(cql.write(filter)))) + ')'
   )
@@ -279,12 +286,6 @@ function transformMultiFilterToCQL(filter) {
   return this.sanitizeGeometryCql(
     '(' + cql.write(cql.simplify(cql.read(cql.write(filter)))) + ')'
   )
-=======
-  return this.sanitizeGeometryCql('(' + cql.write(cql.simplify(cql.read(cql.write(filter)))) + ')')
-}
-function transformMultiFilterToCQL(filter) {
-  return this.sanitizeGeometryCql('(' + cql.write(cql.simplify(cql.read(cql.write(filter)))) + ')')
->>>>>>> c19a161949... ausQuery: EMPTY search now deletes the text input area
 }
 
 function transformCQLToFilter(cqlString) {
