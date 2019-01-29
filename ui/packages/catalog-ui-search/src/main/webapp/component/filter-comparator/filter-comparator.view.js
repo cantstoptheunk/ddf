@@ -34,6 +34,7 @@ var numberComparators = ['>', '<', '=', '>=', '<=', 'EMPTY']
 var booleanComparators = ['=']
 =======
 var geometryComparators = ['INTERSECTS', 'EMPTY']
+var geometryComparatorsAnyGeo = ['INTERSECTS']
 var dateComparators = ['BEFORE', 'AFTER', 'RELATIVE', 'BETWEEN', 'EMPTY']
 var stringComparators = ['CONTAINS', 'MATCHCASE', '=', 'NEAR', 'EMPTY']
 var stringComparatorsAnyText = ['CONTAINS', 'MATCHCASE', '=', 'NEAR']
@@ -76,6 +77,9 @@ module.exports = Marionette.ItemView.extend({
       case 'GEOMETRY':
         if (geometryComparators.indexOf(this.model.get('comparator')) === -1) {
           this.model.set('comparator', geometryComparators[0])
+        }
+        if(this.model.get('type') === 'anyGeo'){
+          return stringComparatorsAnyGeo
         }
         return geometryComparators
       case 'DATE':
