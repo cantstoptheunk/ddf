@@ -70,11 +70,11 @@ function bboxToCQLPolygon(model) {
 }
 
 function generateAnyGeoFilter(property, model) {
-  if (model === null) {
+  if(model === null){
     return {
       type: 'IS NULL',
       property,
-      value: null,
+      value: null
     }
   }
   switch (model.type) {
@@ -269,14 +269,10 @@ function transformFilterToCQL(filter) {
   let read = cql.read(write)
   let simp = cql.simplify(read)
   write = cql.write(simp)
-  return this.sanitizeGeometryCql(
-    '(' + cql.write(cql.simplify(cql.read(cql.write(filter)))) + ')'
-  )
+  return this.sanitizeGeometryCql('(' + cql.write(cql.simplify(cql.read(cql.write(filter)))) + ')')
 }
 function transformMultiFilterToCQL(filter) {
-  return this.sanitizeGeometryCql(
-    '(' + cql.write(cql.simplify(cql.read(cql.write(filter)))) + ')'
-  )
+  return this.sanitizeGeometryCql('(' + cql.write(cql.simplify(cql.read(cql.write(filter)))) + ')')
 }
 
 function transformCQLToFilter(cqlString) {

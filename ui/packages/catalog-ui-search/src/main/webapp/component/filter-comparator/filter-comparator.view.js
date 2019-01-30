@@ -53,6 +53,9 @@ module.exports = Marionette.ItemView.extend({
     var value = $(e.currentTarget).attr('data-value')
     this.model.set('comparator', value)
     this.$el.trigger('closeDropdown.' + CustomElements.getNamespace())
+    if(this.model.attributes.comparator === 'IS EMPTY'){
+      $('.if-editing').toggle()
+    }
   },
   serializeData: function() {
     switch (metacardDefinitions.metacardTypes[this.model.get('type')].type) {
@@ -61,7 +64,7 @@ module.exports = Marionette.ItemView.extend({
         if (geometryComparators.indexOf(this.model.get('comparator')) === -1) {
           this.model.set('comparator', geometryComparators[0])
         }
-        if (this.model.get('type') === 'anyGeo') {
+        if(this.model.get('type') === 'anyGeo'){
           return geometryComparatorsAnyGeo
         }
         return geometryComparators
@@ -96,7 +99,7 @@ module.exports = Marionette.ItemView.extend({
             return comparator !== 'NEAR'
           })
         }
-        if (this.model.get('type') === 'anyText') {
+        if(this.model.get('type') === 'anyText'){
           return stringComparatorsAnyText
         }
         return stringComparators
