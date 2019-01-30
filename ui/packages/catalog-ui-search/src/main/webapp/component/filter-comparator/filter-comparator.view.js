@@ -61,7 +61,11 @@ module.exports = Marionette.ItemView.extend({
         if (geometryComparators.indexOf(this.model.get('comparator')) === -1) {
           this.model.set('comparator', geometryComparators[0])
         }
+<<<<<<< HEAD
         if (this.model.get('type') === 'anyGeo') {
+=======
+        if(this.model.get('type') === 'anyGeo'){
+>>>>>>> 4d3a13fb8e... Input field disappears for all search types
           return geometryComparatorsAnyGeo
         }
         return geometryComparators
