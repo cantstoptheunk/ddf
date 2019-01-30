@@ -135,6 +135,9 @@ module.exports = Marionette.LayoutView.extend({
     }
   },
   edit: function() {
+    if(this.model.attributes.comparator === 'EMPTY'){
+      $('.if-editing').toggle()
+    }    
     this.$el.addClass('is-editing')
     this.querySettings.currentView.turnOnEditing()
     this.queryAdvanced.currentView.turnOnEditing()
@@ -161,7 +164,7 @@ module.exports = Marionette.LayoutView.extend({
     this.model.set({
       cql:
         this.options.isFormBuilder !== true
-          ? this.queryAdvanced.currentView.transformToCql()
+          ? this.queryAdvanced.currentView.transformToCql().replace(' null', '')
           : '',
       filterTree: this.queryAdvanced.currentView.getFilters(),
     })
