@@ -64,8 +64,8 @@ module.exports = Marionette.ItemView.extend({
         if (geometryComparators.indexOf(this.model.get('comparator')) === -1) {
           this.model.set('comparator', geometryComparators[0])
         }
-        if(this.model.get('type') === 'anyGeo'){
-          return stringComparatorsAnyGeo
+        if (this.model.get('type') === 'anyGeo') {
+          return geometryComparatorsAnyGeo
         }
         return geometryComparators
       case 'DATE':
@@ -99,7 +99,7 @@ module.exports = Marionette.ItemView.extend({
             return comparator !== 'NEAR'
           })
         }
-        if(this.model.get('type') === 'anyText'){
+        if (this.model.get('type') === 'anyText') {
           return stringComparatorsAnyText
         }
         return stringComparators

@@ -181,6 +181,7 @@ module.exports = Marionette.LayoutView.extend({
       CONTAINS: 'ILIKE',
       MATCHCASE: 'LIKE',
       EQUALS: '=',
+      EMPTY: 'IS NULL',
       '>': '>',
       '<': '<',
       '=': '=',
@@ -229,8 +230,11 @@ module.exports = Marionette.LayoutView.extend({
   toggleDateClass: function(toggle) {
     this.$el.toggleClass('is-date', toggle)
   },
-  toggleSearchInputClass: function(toggle){
+  toggleSearchInputClass: function(toggle) {
     this.$el.toggleClass('if-editing', toggle)
+  },
+  toggleViewingClass: function(toggle) {
+    this.$el.toggleClass('if-viewing', toggle)
   },
   setDefaultComparator: function(propertyJSON) {
     this.toggleLocationClass(false)
@@ -251,7 +255,7 @@ module.exports = Marionette.LayoutView.extend({
         ) {
           this.model.set('comparator', 'BEFORE')
         }
-        this.toggleDateClass(true)
+        this.toggleDateClass(currentComparator === 'EMPTY')        
         break
       case 'BOOLEAN':
         if (['=', 'EMPTY'].indexOf(currentComparator) === -1) {
@@ -268,6 +272,7 @@ module.exports = Marionette.LayoutView.extend({
         ) {
           this.model.set('comparator', '>')
         }
+        this.toggleViewingClass(currentComparator === 'EMPTY')
         break
       default:
         if (
@@ -303,14 +308,22 @@ module.exports = Marionette.LayoutView.extend({
       currentComparator
     )
     const ViewToUse = determineView(currentComparator)
+    let modelObj = new PropertyModel(propertyJSON)
+    // if (currentComparator === 'EMPTY') {
+    //   modelObj.attributes.value = ''
+    // }
     this.filterInput.show(
       new ViewToUse({
-        model: new PropertyModel(propertyJSON),
+        model: modelObj,
       })
     )
 
     var isEditing = this.$el.hasClass('is-editing')
-    if (isEditing) {
+    if (this.model.attributes.comparator === 'EMPTY') {
+      this.$el.find('filter-comparator').toggle()
+      this.$el.find('filter-input').toggle()
+      // $('.if-editing').toggleAttribute()
+    } else if (isEditing) {
       this.turnOnEditing()
     } else {
       this.turnOffEditing()
@@ -337,9 +350,30 @@ module.exports = Marionette.LayoutView.extend({
         value.distance,
         value.value,
       ])
-    }
-    else if(comparator === 'EMPTY'){
+<<<<<<< HEAD
+    } else if (comparator === 'EMPTY') {
       return CQLUtils.generateFilter(type, property, null)
+=======
+    }
+    // else if(comparator === 'EMPTY'){
+    //   return {
+    //     type: 'OR',
+    //     filters: {
+    //       type: ["=", "IS NULL"],
+    //       property: [property, property],
+    //       value: ["\"\"", null]
+    //     }
+    //   }
+    // } 
+    else if(comparator === 'EMPTY'){
+      return {
+        type: 'OR',
+        filters: [
+          CQLUtils.generateFilter('=', property, "\"\""),
+          CQLUtils.generateFilter(type, property, null)
+        ]
+      }
+>>>>>>> c19a161949... ausQuery: EMPTY search now deletes the text input area
     }
     if (metacardDefinitions.metacardTypes[this.model.get('type')].multivalued) {
       return {
