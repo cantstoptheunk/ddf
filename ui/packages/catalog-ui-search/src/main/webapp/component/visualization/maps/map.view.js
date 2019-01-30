@@ -13,6 +13,8 @@
  *
  **/
 /*global require, setTimeout*/
+import wrapNum from '../../../react-component/utils/wrap-num/wrap-num.tsx'
+
 var wreqr = require('../../../js/wreqr.js')
 var template = require('./map.hbs')
 var Marionette = require('marionette')
@@ -30,19 +32,14 @@ var DropdownModel = require('../../dropdown/dropdown.js')
 var MapContextMenuDropdown = require('../../dropdown/map-context-menu/dropdown.map-context-menu.view.js')
 var MapModel = require('./map.model')
 var MapInfoView = require('../../map-info/map-info.view.js')
-var MapSettingsDropdown = require('../../dropdown/map-settings/dropdown.map-settings.view.js')
 var properties = require('../../../js/properties.js')
 var Common = require('../../../js/Common.js')
+const announcement = require('../../announcement')
 
 const React = require('react')
 const Gazetteer = require('../../../react-component/location/gazetteer.js')
 
-function wrapNum(x, range) {
-  var max = range[1],
-    min = range[0],
-    d = max - min
-  return ((((x - min) % d) + d) % d) + min
-}
+import MapSettings from '../../../react-component/container/map-settings/map-settings'
 
 function findExtreme({ objArray, property, comparator }) {
   if (objArray.length === 0) {
@@ -75,8 +72,8 @@ function getHomeCoordinates() {
           if (isNaN(lon) || isNaN(lat)) {
             return undefined
           }
-          lon = Common.wrapMapCoordinates(lon, [-180, 180])
-          lat = Common.wrapMapCoordinates(lat, [-90, 90])
+          lon = wrapNum(lon, -180, 180)
+          lat = wrapNum(lat, -90, 90)
           return {
             lon: lon,
             lat: lat,
@@ -263,10 +260,16 @@ module.exports = Marionette.LayoutView.extend({
   },
   saveAsHome: function() {
     const boundingBox = this.map.getBoundingBox()
-    user
-      .get('user')
-      .get('preferences')
-      .set('mapHome', boundingBox)
+    const userPreferences = user.get('user').get('preferences')
+    userPreferences.once('sync', () =>
+      announcement.announce({
+        title: 'Success!',
+        message: 'New map home location set.',
+        type: 'success',
+      })
+    )
+
+    userPreferences.set('mapHome', boundingBox)
   },
   addPanZoom: function() {
     const self = this
@@ -309,15 +312,16 @@ module.exports = Marionette.LayoutView.extend({
       )
   },
   addSettings: function() {
+    const MapSettingsView = Marionette.ItemView.extend({
+      template() {
+        return <MapSettings />
+      },
+    })
     this.$el
       .find('.cesium-viewer-toolbar')
       .append('<div class="toolbar-settings is-button"></div>')
     this.addRegion('toolbarSettings', '.toolbar-settings')
-    this.toolbarSettings.show(
-      new MapSettingsDropdown({
-        model: new DropdownModel(),
-      })
-    )
+    this.toolbarSettings.show(new MapSettingsView())
   },
   onMapHover: function(event, mapEvent) {
     var metacard = this.options.selectionInterface

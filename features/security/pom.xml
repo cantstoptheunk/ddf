@@ -13,7 +13,7 @@
  **/
 -->
 <project
-        xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns="http://maven.apache.org/POM/4.0.0"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
@@ -412,29 +412,44 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.ops4j.pax.web</groupId>
-            <artifactId>pax-web-api</artifactId>
-            <version>${pax.web.codice.version}</version>
+            <groupId>ddf.platform.security</groupId>
+            <artifactId>security-rest-clientapi</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.ops4j.pax.web</groupId>
-            <artifactId>pax-web-jetty</artifactId>
-            <version>${pax.web.codice.version}</version>
+            <groupId>ddf.platform.error</groupId>
+            <artifactId>platform-error-page-injector</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.ops4j.pax.web</groupId>
-            <artifactId>pax-web-runtime</artifactId>
-            <version>${pax.web.codice.version}</version>
+            <groupId>ddf.platform.migration</groupId>
+            <artifactId>platform-migratable-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.ops4j.pax.web</groupId>
-            <artifactId>pax-web-spi</artifactId>
-            <version>${pax.web.codice.version}</version>
+            <groupId>ddf.platform.api</groupId>
+            <artifactId>platform-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.ops4j.pax.web</groupId>
-            <artifactId>pax-web-jsp</artifactId>
-            <version>${pax.web.codice.version}</version>
+            <groupId>ddf.security.migration</groupId>
+            <artifactId>security-migratable</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ddf.security.core</groupId>
+            <artifactId>security-core-services</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ddf.platform.security</groupId>
+            <artifactId>security-rest-cxfwrapper</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ddf.security.sts</groupId>
+            <artifactId>security-sts-casclaimshandler</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <!--feature dependencies-->
