@@ -53,9 +53,6 @@ module.exports = Marionette.ItemView.extend({
     var value = $(e.currentTarget).attr('data-value')
     this.model.set('comparator', value)
     this.$el.trigger('closeDropdown.' + CustomElements.getNamespace())
-    if(this.model.attributes.comparator === 'EMPTY'){
-      $('.if-editing').toggle()
-    }
   },
   serializeData: function() {
     switch (metacardDefinitions.metacardTypes[this.model.get('type')].type) {
@@ -99,11 +96,7 @@ module.exports = Marionette.ItemView.extend({
             return comparator !== 'NEAR'
           })
         }
-<<<<<<< HEAD
         if (this.model.get('type') === 'anyText') {
-=======
-        if(this.model.get('type') === 'anyText'){
->>>>>>> b49da09f81... AnyText searches no longer contain empty operator
           return stringComparatorsAnyText
         }
         return stringComparators

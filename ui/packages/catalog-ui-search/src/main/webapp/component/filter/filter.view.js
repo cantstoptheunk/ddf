@@ -241,7 +241,13 @@ module.exports = Marionette.LayoutView.extend({
   toggleSearchInputClass: function(toggle){
     this.$el.toggleClass('if-editing', toggle)
   },
+<<<<<<< HEAD
 >>>>>>> 65b119f54e... Adding EMPTY operator to numerical, date, and location attributes
+=======
+  toggleViewingClass: function(toggle){
+    this.$el.toggleClass('if-viewing', toggle)
+  },
+>>>>>>> 4d3a13fb8e... Input field disappears for all search types
   setDefaultComparator: function(propertyJSON) {
     this.toggleLocationClass(false)
     this.toggleDateClass(false)
@@ -261,7 +267,11 @@ module.exports = Marionette.LayoutView.extend({
         ) {
           this.model.set('comparator', 'BEFORE')
         }
+<<<<<<< HEAD
         this.toggleDateClass(currentComparator === 'EMPTY')        
+=======
+        currentComparator === 'EMPTY' ? this.toggleDateClass(false) : this.toggleDateClass(true)
+>>>>>>> 4d3a13fb8e... Input field disappears for all search types
         break
       case 'BOOLEAN':
         if (['=', 'EMPTY'].indexOf(currentComparator) === -1) {
@@ -278,7 +288,11 @@ module.exports = Marionette.LayoutView.extend({
         ) {
           this.model.set('comparator', '>')
         }
+<<<<<<< HEAD
         this.toggleViewingClass(currentComparator === 'EMPTY')
+=======
+        currentComparator === 'EMPTY' ? this.toggleViewingClass(false) : this.toggleViewingClass(true)
+>>>>>>> 4d3a13fb8e... Input field disappears for all search types
         break
       default:
         if (
@@ -315,21 +329,39 @@ module.exports = Marionette.LayoutView.extend({
     )
     const ViewToUse = determineView(currentComparator)
     let modelObj = new PropertyModel(propertyJSON)
+<<<<<<< HEAD
     // if (currentComparator === 'EMPTY') {
     //   modelObj.attributes.value = ''
     // }
     this.filterInput.show(
       new ViewToUse({
         model: modelObj,
+=======
+    if(currentComparator === 'EMPTY'){
+      modelObj.attributes.value =  ""
+    }
+    this.filterInput.show(
+      new ViewToUse({
+        model: modelObj
+>>>>>>> 4d3a13fb8e... Input field disappears for all search types
       })
     )
 
     var isEditing = this.$el.hasClass('is-editing')
+<<<<<<< HEAD
     if (this.model.attributes.comparator === 'EMPTY') {
       this.$el.find('filter-comparator').toggle()
       this.$el.find('filter-input').toggle()
       // $('.if-editing').toggleAttribute()
     } else if (isEditing) {
+=======
+    if(this.model.attributes.comparator === 'EMPTY'){
+      this.$el.find('filter-comparator').toggle()
+      this.$el.find('filter-input').toggle()
+      // $('.if-editing').toggleAttribute()
+    }
+    else if (isEditing) {
+>>>>>>> 4d3a13fb8e... Input field disappears for all search types
       this.turnOnEditing()
     } else {
       this.turnOffEditing()
