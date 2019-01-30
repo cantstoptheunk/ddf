@@ -230,10 +230,10 @@ module.exports = Marionette.LayoutView.extend({
   toggleDateClass: function(toggle) {
     this.$el.toggleClass('is-date', toggle)
   },
-  toggleSearchInputClass: function(toggle){
+  toggleSearchInputClass: function(toggle) {
     this.$el.toggleClass('if-editing', toggle)
   },
-  toggleViewingClass: function(toggle){
+  toggleViewingClass: function(toggle) {
     this.$el.toggleClass('if-viewing', toggle)
   },
   setDefaultComparator: function(propertyJSON) {
@@ -255,7 +255,9 @@ module.exports = Marionette.LayoutView.extend({
         ) {
           this.model.set('comparator', 'BEFORE')
         }
-        currentComparator === 'IS EMPTY' ? this.toggleDateClass(false) : this.toggleDateClass(true)
+        currentComparator === 'IS EMPTY'
+          ? this.toggleDateClass(false)
+          : this.toggleDateClass(true)
         break
       case 'BOOLEAN':
         if (['=', 'IS EMPTY'].indexOf(currentComparator) === -1) {
@@ -272,7 +274,9 @@ module.exports = Marionette.LayoutView.extend({
         ) {
           this.model.set('comparator', '>')
         }
-        currentComparator === 'IS EMPTY' ? this.toggleViewingClass(false) : this.toggleViewingClass(true)
+        currentComparator === 'IS EMPTY'
+          ? this.toggleViewingClass(false)
+          : this.toggleViewingClass(true)
         break
       default:
         if (
@@ -309,21 +313,20 @@ module.exports = Marionette.LayoutView.extend({
     )
     const ViewToUse = determineView(currentComparator)
     let modelObj = new PropertyModel(propertyJSON)
-    if(currentComparator === 'IS EMPTY'){
-      modelObj.attributes.value =  ""
+    if (currentComparator === 'IS EMPTY') {
+      modelObj.attributes.value = ''
     }
     this.filterInput.show(
       new ViewToUse({
-        model: modelObj
+        model: modelObj,
       })
     )
 
     var isEditing = this.$el.hasClass('is-editing')
-    if(this.model.attributes.comparator === 'IS EMPTY'){
+    if (this.model.attributes.comparator === 'IS EMPTY') {
       this.$el.find('filter-comparator').toggle()
       this.$el.find('filter-input').toggle()
-    }
-    else if (isEditing) {
+    } else if (isEditing) {
       this.turnOnEditing()
     } else {
       this.turnOffEditing()
@@ -350,8 +353,7 @@ module.exports = Marionette.LayoutView.extend({
         value.distance,
         value.value,
       ])
-    }
-    else if(comparator === 'IS EMPTY'){
+    } else if (comparator === 'IS EMPTY') {
       return CQLUtils.generateFilter(type, property, null)
     }
     if (metacardDefinitions.metacardTypes[this.model.get('type')].multivalued) {
