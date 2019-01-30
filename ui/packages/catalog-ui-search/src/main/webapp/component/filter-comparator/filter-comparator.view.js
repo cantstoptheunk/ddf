@@ -20,11 +20,13 @@ const template = require('./filter-comparator.hbs')
 const CustomElements = require('../../js/CustomElements.js')
 const metacardDefinitions = require('../singletons/metacard-definitions.js')
 
-var geometryComparators = ['INTERSECTS']
-var dateComparators = ['BEFORE', 'AFTER', 'RELATIVE', 'BETWEEN']
-var stringComparators = ['CONTAINS', 'MATCHCASE', '=', 'NEAR']
-var numberComparators = ['>', '<', '=', '>=', '<=']
-var booleanComparators = ['=']
+var geometryComparators = ['INTERSECTS', 'IS EMPTY']
+var geometryComparatorsAnyGeo = ['INTERSECTS']
+var dateComparators = ['BEFORE', 'AFTER', 'RELATIVE', 'BETWEEN', 'IS EMPTY']
+var stringComparators = ['CONTAINS', 'MATCHCASE', '=', 'NEAR', 'IS EMPTY']
+var stringComparatorsAnyText = ['CONTAINS', 'MATCHCASE', '=', 'NEAR']
+var numberComparators = ['>', '<', '=', '>=', '<=', 'IS EMPTY']
+var booleanComparators = ['=', 'IS EMPTY']
 
 module.exports = Marionette.ItemView.extend({
   template: template,
@@ -59,6 +61,9 @@ module.exports = Marionette.ItemView.extend({
         if (geometryComparators.indexOf(this.model.get('comparator')) === -1) {
           this.model.set('comparator', geometryComparators[0])
         }
+        if(this.model.get('type') === 'anyGeo'){
+          return geometryComparatorsAnyGeo
+        }
         return geometryComparators
       case 'DATE':
         if (dateComparators.indexOf(this.model.get('comparator')) === -1) {
@@ -90,6 +95,9 @@ module.exports = Marionette.ItemView.extend({
           return stringComparators.filter(function(comparator) {
             return comparator !== 'NEAR'
           })
+        }
+        if(this.model.get('type') === 'anyText'){
+          return stringComparatorsAnyText
         }
         return stringComparators
     }
