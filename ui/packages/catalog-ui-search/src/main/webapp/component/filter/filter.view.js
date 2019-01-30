@@ -181,7 +181,7 @@ module.exports = Marionette.LayoutView.extend({
       CONTAINS: 'ILIKE',
       MATCHCASE: 'LIKE',
       EQUALS: '=',
-      'IS EMPTY': 'IS NULL',
+      EMPTY: 'IS NULL',
       '>': '>',
       '<': '<',
       '=': '=',
@@ -242,31 +242,23 @@ module.exports = Marionette.LayoutView.extend({
     var currentComparator = this.model.get('comparator')
     switch (propertyJSON.type) {
       case 'LOCATION':
-        if (['INTERSECTS', 'IS EMPTY'].indexOf(currentComparator) === -1) {
+        if (['INTERSECTS', 'EMPTY'].indexOf(currentComparator) === -1) {
           this.model.set('comparator', 'INTERSECTS')
         }
         this.toggleLocationClass(true)
         break
       case 'DATE':
         if (
-          ['BEFORE', 'AFTER', 'RELATIVE', 'BETWEEN', 'IS EMPTY'].indexOf(
+          ['BEFORE', 'AFTER', 'RELATIVE', 'BETWEEN', 'EMPTY'].indexOf(
             currentComparator
           ) === -1
         ) {
           this.model.set('comparator', 'BEFORE')
         }
-<<<<<<< HEAD
-<<<<<<< HEAD
-        currentComparator === 'IS EMPTY' ? this.toggleDateClass(false) : this.toggleDateClass(true)
-=======
         currentComparator === 'EMPTY' ? this.toggleDateClass(false) : this.toggleDateClass(true)
->>>>>>> 4d3a13fb8e... Input field disappears for all search types
-=======
-        currentComparator === 'IS EMPTY' ? this.toggleDateClass(false) : this.toggleDateClass(true)
->>>>>>> 334059ba87... Addressing my own comments on PR
         break
       case 'BOOLEAN':
-        if (['=', 'IS EMPTY'].indexOf(currentComparator) === -1) {
+        if (['=', 'EMPTY'].indexOf(currentComparator) === -1) {
           this.model.set('comparator', '=')
         }
         break
@@ -278,22 +270,13 @@ module.exports = Marionette.LayoutView.extend({
         if (
           ['>', '<', '=', '>=', '<=', 'EMPTY'].indexOf(currentComparator) === -1
         ) {
-        if (['>', '<', '=', '>=', '<=', 'IS EMPTY'].indexOf(currentComparator) === -1) {
           this.model.set('comparator', '>')
         }
-<<<<<<< HEAD
-<<<<<<< HEAD
-        currentComparator === 'IS EMPTY' ? this.toggleViewingClass(false) : this.toggleViewingClass(true)
-=======
         currentComparator === 'EMPTY' ? this.toggleViewingClass(false) : this.toggleViewingClass(true)
->>>>>>> 4d3a13fb8e... Input field disappears for all search types
-=======
-        currentComparator === 'IS EMPTY' ? this.toggleViewingClass(false) : this.toggleViewingClass(true)
->>>>>>> 334059ba87... Addressing my own comments on PR
         break
       default:
         if (
-          ['CONTAINS', 'MATCHCASE', '=', 'NEAR', 'IS EMPTY'].indexOf(
+          ['CONTAINS', 'MATCHCASE', '=', 'NEAR', 'EMPTY'].indexOf(
             currentComparator
           ) === -1
         ) {
@@ -326,15 +309,7 @@ module.exports = Marionette.LayoutView.extend({
     )
     const ViewToUse = determineView(currentComparator)
     let modelObj = new PropertyModel(propertyJSON)
-<<<<<<< HEAD
-<<<<<<< HEAD
-    if(currentComparator === 'IS EMPTY'){
-=======
     if(currentComparator === 'EMPTY'){
->>>>>>> 4d3a13fb8e... Input field disappears for all search types
-=======
-    if(currentComparator === 'IS EMPTY'){
->>>>>>> 334059ba87... Addressing my own comments on PR
       modelObj.attributes.value =  ""
     }
     this.filterInput.show(
@@ -344,22 +319,10 @@ module.exports = Marionette.LayoutView.extend({
     )
 
     var isEditing = this.$el.hasClass('is-editing')
-<<<<<<< HEAD
-<<<<<<< HEAD
-    if(this.model.attributes.comparator === 'IS EMPTY'){
-      this.$el.find('filter-comparator').toggle()
-      this.$el.find('filter-input').toggle()
-=======
     if(this.model.attributes.comparator === 'EMPTY'){
       this.$el.find('filter-comparator').toggle()
       this.$el.find('filter-input').toggle()
       // $('.if-editing').toggleAttribute()
->>>>>>> 4d3a13fb8e... Input field disappears for all search types
-=======
-    if(this.model.attributes.comparator === 'IS EMPTY'){
-      this.$el.find('filter-comparator').toggle()
-      this.$el.find('filter-input').toggle()
->>>>>>> 334059ba87... Addressing my own comments on PR
     }
     else if (isEditing) {
       this.turnOnEditing()
@@ -389,10 +352,7 @@ module.exports = Marionette.LayoutView.extend({
         value.value,
       ])
     }
-    else if(comparator === 'IS EMPTY'){
-      return CQLUtils.generateFilter(type, property, null)
-    }
-    else if(comparator === 'IS EMPTY'){
+    else if(comparator === 'EMPTY'){
       return CQLUtils.generateFilter(type, property, null)
     }
     if (metacardDefinitions.metacardTypes[this.model.get('type')].multivalued) {

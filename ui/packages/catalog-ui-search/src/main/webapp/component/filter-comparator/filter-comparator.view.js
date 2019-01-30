@@ -20,13 +20,13 @@ const template = require('./filter-comparator.hbs')
 const CustomElements = require('../../js/CustomElements.js')
 const metacardDefinitions = require('../singletons/metacard-definitions.js')
 
-var geometryComparators = ['INTERSECTS', 'IS EMPTY']
+var geometryComparators = ['INTERSECTS', 'EMPTY']
 var geometryComparatorsAnyGeo = ['INTERSECTS']
-var dateComparators = ['BEFORE', 'AFTER', 'RELATIVE', 'BETWEEN', 'IS EMPTY']
-var stringComparators = ['CONTAINS', 'MATCHCASE', '=', 'NEAR', 'IS EMPTY']
+var dateComparators = ['BEFORE', 'AFTER', 'RELATIVE', 'BETWEEN', 'EMPTY']
+var stringComparators = ['CONTAINS', 'MATCHCASE', '=', 'NEAR', 'EMPTY']
 var stringComparatorsAnyText = ['CONTAINS', 'MATCHCASE', '=', 'NEAR']
-var numberComparators = ['>', '<', '=', '>=', '<=', 'IS EMPTY']
-var booleanComparators = ['=', 'IS EMPTY']
+var numberComparators = ['>', '<', '=', '>=', '<=', 'EMPTY']
+var booleanComparators = ['=', 'EMPTY']
 
 module.exports = Marionette.ItemView.extend({
   template: template,
@@ -53,12 +53,6 @@ module.exports = Marionette.ItemView.extend({
     var value = $(e.currentTarget).attr('data-value')
     this.model.set('comparator', value)
     this.$el.trigger('closeDropdown.' + CustomElements.getNamespace())
-<<<<<<< HEAD
-    if(this.model.attributes.comparator === 'IS EMPTY'){
-      $('.if-editing').toggle()
-    }
-=======
->>>>>>> 4d3a13fb8e... Input field disappears for all search types
   },
   serializeData: function() {
     switch (metacardDefinitions.metacardTypes[this.model.get('type')].type) {
