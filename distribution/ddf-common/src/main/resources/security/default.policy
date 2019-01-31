@@ -92,7 +92,7 @@ grant codeBase "file:/org.apache.felix.configadmin" {
     permission org.osgi.framework.BundlePermission "*", "provide, require, host, fragment";
 }
 
-grant codeBase "file:/org.apache.karaf.features.core" {
+grant codeBase "file:/org.apache.karaf.features.core/org.apache.karaf.features.command" {
     permission java.io.FilePermission "${ddf.home.perm}etc${/}-", "read,write";
     permission java.io.FilePermission "${ddf.home.perm}examples", "read,write";
     permission java.io.FilePermission "${ddf.home.perm}examples${/}-", "read,write";
@@ -423,7 +423,7 @@ grant codeBase "file:/platform-country-converter-local" {
     permission java.io.FilePermission "${ddf.home.perm}etc${/}fipsToIso.properties", "read";
 }
 
-grant codeBase "file:/admin-core-migration-commands/catalog-core-solrcommands/security-sts-attributequeryclaimshandler/catalog-confluence-source/org.eclipse.jetty.websocket.common/session-management-impl/security-sts-realm/security-core-impl/security-sts-server/org.eclipse.jetty.websocket.server/security-command-sessionmanager" {
+grant codeBase "file:/admin-core-migration-commands/catalog-core-solrcommands/security-sts-attributequeryclaimshandler/catalog-confluence-source/org.eclipse.jetty.websocket.common/session-management-impl/security-sts-realm/security-core-impl/security-sts-server/org.eclipse.jetty.websocket.server/security-command-sessionmanager/catalog-core-eventcommands" {
     permission java.io.FilePermission "${ddf.home.perm}etc${/}keystores${/}*", "read";
     permission java.io.FilePermission "${ddf.home.perm}etc${/}ws-security${/}server${/}*", "read";
 }
@@ -606,4 +606,11 @@ grant
     permission java.io.FilePermission "${ddf.home.perm}etc${/}application-definitions${/}-", "read";
     permission java.io.FilePermission "${ddf.home.perm}etc${/}keystores${/}-", "read";
     permission java.lang.RuntimePermission "createClassLoader";
+}
+
+grant codeBase "file:/security-servlet-session-expiry" {
+    permission java.io.FilePermission "${ddf.home.perm}etc${/}ws-security${/}server${/}signature.properties", "read";
+    permission java.io.FilePermission "${ddf.home.perm}etc${/}ws-security${/}server${/}encryption.properties", "read";
+    permission java.io.FilePermission "${ddf.home.perm}etc${/}keystores${/}serverTruststore.jks", "read";
+    permission java.io.FilePermission "${ddf.home.perm}etc${/}keystores${/}serverKeystore.jks", "read";
 }

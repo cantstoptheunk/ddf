@@ -16,6 +16,7 @@ const usngs = require('usng.js')
 const store = require('../../js/store.js')
 const Common = require('../../js/Common.js')
 const dmsUtils = require('../location-new/utils/dms-utils.js')
+const DistanceUtils = require('../../js/DistanceUtils.js')
 
 var converter = new usngs.Converter()
 var minimumDifference = 0.0001
@@ -46,18 +47,20 @@ function convertToValid(key, model) {
       parseFloat(key.mapSouth || model.get('mapSouth')) + minimumDifference
   }
   if (key.mapNorth !== undefined) {
-    key.mapNorth = Math.max(-90 + minimumDifference, key.mapNorth)
+    key.mapNorth = Math.max(-90, key.mapNorth)
     key.mapNorth = Math.min(90, key.mapNorth)
   }
   if (key.mapSouth !== undefined) {
     key.mapSouth = Math.max(-90, key.mapSouth)
-    key.mapSouth = Math.min(90 - minimumDifference, key.mapSouth)
+    key.mapSouth = Math.min(90, key.mapSouth)
   }
   if (key.mapWest !== undefined) {
-    key.mapWest = Common.wrapMapCoordinates(key.mapWest, [-180, 180])
+    key.mapWest = Math.max(-180, key.mapWest)
+    key.mapWest = Math.min(180, key.mapWest)
   }
   if (key.mapEast !== undefined) {
-    key.mapEast = Common.wrapMapCoordinates(key.mapEast, [-180, 180])
+    key.mapEast = Math.max(-180, key.mapEast)
+    key.mapEast = Math.min(180, key.mapEast)
   }
   if (key.lat !== undefined) {
     key.lat = Math.max(-90, key.lat)
@@ -117,10 +120,11 @@ module.exports = Backbone.AssociatedModel.extend({
     lineWidth: 1,
     lineUnits: 'meters',
     polygon: undefined,
-    multipolygon: undefined,
     polygonBufferWidth: 0,
+    polyType: undefined,
     polygonBufferUnits: 'meters',
     hasKeyword: false,
+    keywordValue: undefined,
     utmUpsUpperLeftEasting: undefined,
     utmUpsUpperLeftNorthing: undefined,
     utmUpsUpperLeftHemisphere: 'Northern',
@@ -378,6 +382,10 @@ module.exports = Backbone.AssociatedModel.extend({
         }
       )
 
+      result.north = DistanceUtils.coordinateRound(result.north)
+      result.east = DistanceUtils.coordinateRound(result.east)
+      result.south = DistanceUtils.coordinateRound(result.south)
+      result.west = DistanceUtils.coordinateRound(result.west)
       this.set(result)
     } else if (this.get('locationType') === 'dms') {
       this.setBboxDmsFromMap()
