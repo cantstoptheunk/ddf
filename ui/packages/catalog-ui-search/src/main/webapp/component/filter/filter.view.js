@@ -237,6 +237,7 @@ module.exports = Marionette.LayoutView.extend({
   toggleViewingClass: function(toggle) {
     this.$el.toggleClass('if-viewing', toggle)
   },
+<<<<<<< HEAD
 =======
   toggleSearchInputClass: function(toggle){
     this.$el.toggleClass('if-editing', toggle)
@@ -248,6 +249,12 @@ module.exports = Marionette.LayoutView.extend({
     this.$el.toggleClass('if-viewing', toggle)
   },
 >>>>>>> 4d3a13fb8e... Input field disappears for all search types
+=======
+  toggleEditor: function(toggle) {
+    this.toggleViewingClass(toggle)
+    this.toggleSearchInputClass(toggle)
+  },
+>>>>>>> 3ae94ff813... Fixed switching attributes bug
   setDefaultComparator: function(propertyJSON) {
     this.toggleLocationClass(false)
     this.toggleDateClass(false)
@@ -257,7 +264,8 @@ module.exports = Marionette.LayoutView.extend({
         if (['INTERSECTS', 'EMPTY'].indexOf(currentComparator) === -1) {
           this.model.set('comparator', 'INTERSECTS')
         }
-        this.toggleLocationClass(true)
+        this.toggleEditor(currentComparator !== 'EMPTY')
+        this.toggleLocationClass(currentComparator === 'EMPTY')
         break
       case 'DATE':
         if (
@@ -268,10 +276,14 @@ module.exports = Marionette.LayoutView.extend({
           this.model.set('comparator', 'BEFORE')
         }
 <<<<<<< HEAD
+<<<<<<< HEAD
         this.toggleDateClass(currentComparator === 'EMPTY')        
 =======
         currentComparator === 'EMPTY' ? this.toggleDateClass(false) : this.toggleDateClass(true)
 >>>>>>> 4d3a13fb8e... Input field disappears for all search types
+=======
+        this.toggleEditor(currentComparator !== 'EMPTY')        
+>>>>>>> 3ae94ff813... Fixed switching attributes bug
         break
       case 'BOOLEAN':
         if (['=', 'EMPTY'].indexOf(currentComparator) === -1) {
@@ -289,10 +301,14 @@ module.exports = Marionette.LayoutView.extend({
           this.model.set('comparator', '>')
         }
 <<<<<<< HEAD
+<<<<<<< HEAD
         this.toggleViewingClass(currentComparator === 'EMPTY')
 =======
         currentComparator === 'EMPTY' ? this.toggleViewingClass(false) : this.toggleViewingClass(true)
 >>>>>>> 4d3a13fb8e... Input field disappears for all search types
+=======
+        this.toggleEditor(currentComparator !== 'EMPTY')
+>>>>>>> 3ae94ff813... Fixed switching attributes bug
         break
       default:
         if (
@@ -302,7 +318,7 @@ module.exports = Marionette.LayoutView.extend({
         ) {
           this.model.set('comparator', 'CONTAINS')
         }
-        this.toggleLocationClass(false)
+        // this.toggleEditor(currentComparator === 'EMPTY')
         break
     }
   },
@@ -322,6 +338,9 @@ module.exports = Marionette.LayoutView.extend({
     let value = Common.duplicate(this.model.get('value'))
     const currentComparator = this.model.get('comparator')
     value = this.transformValue(value, currentComparator)
+    if(currentComparator === 'EMPTY'){
+      value = []
+    }
     const propertyJSON = generatePropertyJSON(
       value,
       this.model.get('type'),
@@ -329,39 +348,21 @@ module.exports = Marionette.LayoutView.extend({
     )
     const ViewToUse = determineView(currentComparator)
     let modelObj = new PropertyModel(propertyJSON)
-<<<<<<< HEAD
-    // if (currentComparator === 'EMPTY') {
-    //   modelObj.attributes.value = ''
-    // }
-    this.filterInput.show(
-      new ViewToUse({
-        model: modelObj,
-=======
     if(currentComparator === 'EMPTY'){
       modelObj.attributes.value =  ""
     }
     this.filterInput.show(
       new ViewToUse({
         model: modelObj
->>>>>>> 4d3a13fb8e... Input field disappears for all search types
       })
     )
 
     var isEditing = this.$el.hasClass('is-editing')
-<<<<<<< HEAD
     if (this.model.attributes.comparator === 'EMPTY') {
       this.$el.find('filter-comparator').toggle()
       this.$el.find('filter-input').toggle()
       // $('.if-editing').toggleAttribute()
     } else if (isEditing) {
-=======
-    if(this.model.attributes.comparator === 'EMPTY'){
-      this.$el.find('filter-comparator').toggle()
-      this.$el.find('filter-input').toggle()
-      // $('.if-editing').toggleAttribute()
-    }
-    else if (isEditing) {
->>>>>>> 4d3a13fb8e... Input field disappears for all search types
       this.turnOnEditing()
     } else {
       this.turnOffEditing()
