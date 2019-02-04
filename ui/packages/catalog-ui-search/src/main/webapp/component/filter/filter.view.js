@@ -240,9 +240,6 @@ module.exports = Marionette.LayoutView.extend({
   toggleDateClass: function(toggle) {
     this.$el.toggleClass('is-date', toggle)
   },
-  toggleGeometryClass: function(toggle) {
-    this.$el.toggleClass('location-radio', toggle)
-  },
   setDefaultComparator: function(propertyJSON) {
     this.toggleLocationClass(false)
     this.toggleDateClass(false)
@@ -253,7 +250,6 @@ module.exports = Marionette.LayoutView.extend({
           this.model.set('comparator', 'INTERSECTS')
         }
         this.toggleLocationClass(currentComparator === 'EMPTY')
-        this.toggleGeometryClass(currentComparator === 'EMPTY')
         break
       case 'DATE':
         if (
