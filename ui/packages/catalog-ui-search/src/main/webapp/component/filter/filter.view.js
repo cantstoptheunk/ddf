@@ -30,11 +30,11 @@ const CQLUtils = require('../../js/CQLUtils.js')
 const properties = require('../../js/properties.js')
 const Common = require('../../js/Common.js')
 
-const geometryComparators = ['EMPTY', 'INTERSECTS']
-const dateComparators = ['EMPTY', 'BEFORE', 'AFTER', 'RELATIVE', 'BETWEEN']
-const stringComparators = ['EMPTY', 'CONTAINS', 'MATCHCASE', '=', 'NEAR']
-const numberComparators = ['EMPTY', '>', '<', '=', '>=', '<=']
-const booleanComparators = ['EMPTY', '=']
+const geometryComparators = ['IS EMPTY', 'INTERSECTS']
+const dateComparators = ['IS EMPTY', 'BEFORE', 'AFTER', 'RELATIVE', 'BETWEEN']
+const stringComparators = ['IS EMPTY', 'CONTAINS', 'MATCHCASE', '=', 'NEAR']
+const numberComparators = ['IS EMPTY', '>', '<', '=', '>=', '<=']
+const booleanComparators = ['IS EMPTY', '=']
 
 const generatePropertyJSON = (value, type, comparator) => {
   const propertyJSON = _.extend({}, metacardDefinitions.metacardTypes[type], {
@@ -196,7 +196,7 @@ module.exports = Marionette.LayoutView.extend({
       CONTAINS: 'ILIKE',
       MATCHCASE: 'LIKE',
       EQUALS: '=',
-      EMPTY: 'IS NULL',
+      'IS EMPTY': 'IS NULL',
       '>': '>',
       '<': '<',
       '=': '=',
@@ -254,7 +254,7 @@ module.exports = Marionette.LayoutView.extend({
         if (geometryComparators.indexOf(currentComparator) === -1) {
           this.model.set('comparator', 'INTERSECTS')
         }
-        this.toggleLocationClass(currentComparator === 'EMPTY')
+        this.toggleLocationClass(currentComparator === 'IS EMPTY')
         break
       case 'DATE':
         if (dateComparators.indexOf(currentComparator) === -1) {
@@ -301,7 +301,7 @@ module.exports = Marionette.LayoutView.extend({
     value = this.transformValue(value, currentComparator)
     let type = this.model.get('type')
 
-    if (currentComparator === 'EMPTY') {
+    if (currentComparator === 'IS EMPTY') {
       value = []
       type = 'STRING'
     }
@@ -314,7 +314,7 @@ module.exports = Marionette.LayoutView.extend({
     )
 
     var isEditing = this.$el.hasClass('is-editing')
-    if (this.model.attributes.comparator === 'EMPTY') {
+    if (this.model.attributes.comparator === 'IS EMPTY') {
       this.$el.find('filter-comparator').toggle()
       this.$el.find('filter-input').toggle()
     } else if (isEditing) {
@@ -344,7 +344,7 @@ module.exports = Marionette.LayoutView.extend({
         value.distance,
         value.value,
       ])
-    } else if (comparator === 'EMPTY') {
+    } else if (comparator === 'IS EMPTY') {
       return CQLUtils.generateFilter(type, property, null)
     }
     if (metacardDefinitions.metacardTypes[this.model.get('type')].multivalued) {
