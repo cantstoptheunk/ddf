@@ -36,26 +36,14 @@ const PropertyResultCount = styled.div`
 
 const QuerySettings = styled.div`
   .editor-header,
-  .editor-footer {
-    display: none;
-  }
   .editor-properties {
     padding: 0px;
-  }
-`
-
-const EditorFooter = styled<Props, 'div'>('div')`
-  display: ${props => (props.showFooter ? 'block' : 'none')};
-  button {
-    display: inline-block;
-    width: 50%;
   }
 `
 
 type Props = {
   onClose?: () => void
   model?: any
-  showFooter: boolean
 } & WithBackboneProps
 
 class SearchSettings extends React.Component<Props, {}> {
@@ -81,16 +69,6 @@ class SearchSettings extends React.Component<Props, {}> {
             <MarionetteRegionContainer view={this.querySettingsView} />
           </QuerySettings>
         </div>
-        <EditorFooter {...this.props}>
-          <button className="is-negative" onClick={this.triggerCancel}>
-            <span className="fa fa-times" />
-            <span>Cancel</span>
-          </button>
-          <button className="is-positive" onClick={this.triggerSave}>
-            <span className="fa fa-floppy-o" />
-            <span>Save</span>
-          </button>
-        </EditorFooter>
       </Root>
     )
   }
@@ -157,13 +135,6 @@ class SearchSettings extends React.Component<Props, {}> {
       model: new QueryModel.Model(),
       inSearchSettings: true,
     })
-  }
-  componentWillUnmount = () => {
-    if (!this.props.showFooter) {
-      this.updateResultCountSettings()
-      this.updateSearchSettings()
-      user.savePreferences()
-    }
   }
 }
 

@@ -12,7 +12,6 @@
 import * as React from 'react'
 import ThemeSettings from '../../container/theme-settings'
 import AlertSettings from '../../container/alert-settings'
-import SearchSettings from '../../../react-component/presentation/search-settings/search-settings'
 import HiddenSettings from '../../../react-component/container/user-blacklist/user-blacklist'
 const MapSettings = require('../../../component/layers/layers.view.js')
 const TimeSettings = require('../../../component/time-settings/time-settings.view.js')
@@ -133,15 +132,6 @@ class UserSettings extends React.Component<Props, State> {
               this.updateComponent(
                 <MarionetteRegionContainer view={MapSettings} />
               )
-            }}
-            disabled={Boolean(component)}
-          />
-          <NavigationButton
-            buttonType={buttonTypeEnum.neutral}
-            text="Search Options"
-            icon="fa fa-search"
-            onClick={() => {
-              this.updateComponent(<SearchSettings showFooter={false} />)
             }}
             disabled={Boolean(component)}
           />
