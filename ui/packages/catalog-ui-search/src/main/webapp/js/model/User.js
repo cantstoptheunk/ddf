@@ -16,6 +16,7 @@ import {
   Restrictions,
   Security,
 } from '../../react-component/utils/security/security'
+import { on } from 'cluster';
 
 const _ = require('underscore')
 const _get = require('lodash.get')
@@ -149,6 +150,7 @@ User.Preferences = Backbone.AssociatedModel.extend({
       hoverPreview: true,
       querySettings: new QuerySettings(),
       mapHome: undefined,
+      spellcheck: on,
     }
   },
   relations: [

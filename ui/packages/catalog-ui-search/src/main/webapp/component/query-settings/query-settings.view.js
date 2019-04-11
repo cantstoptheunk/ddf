@@ -13,6 +13,8 @@
  *
  **/
 /*global define, setTimeout*/
+import * as React from 'react'
+
 const Marionette = require('marionette')
 const Backbone = require('backbone')
 const _ = require('underscore')
@@ -32,6 +34,9 @@ const announcement = require('../announcement/index.jsx')
 import { InvalidSearchFormMessage } from 'component/announcement/CommonMessages'
 const ResultForm = require('../result-form/result-form.js')
 
+const SpellcheckView = require('../dropdown/query-src/dropdown.query-src.view.js')
+var user = require('../../singletons/user-instance.js')
+
 module.exports = plugin(
   Marionette.LayoutView.extend({
     template: template,
@@ -47,6 +52,7 @@ module.exports = plugin(
       settingsSortField: '.settings-sorting-field',
       settingsSrc: '.settings-src',
       resultForm: '.result-form',
+      spellcheckForm: '.spellcheck-form',
       extensions: '.query-extensions',
     },
     ui: {},
@@ -73,6 +79,7 @@ module.exports = plugin(
     onBeforeShow: function() {
       this.setupSortFieldDropdown()
       this.setupSrcDropdown()
+      this.setupSpellcheck()
       this.turnOnEditing()
       this.renderResultForms(this.resultFormCollection.filteredList)
       this.setupExtensions()
@@ -157,6 +164,10 @@ module.exports = plugin(
         })
       )
       this.settingsSrc.currentView.turnOffEditing()
+    },
+    setupSpellcheck: function() {
+      const userPreferences = user.get('user').get('preferences')
+
     },
     turnOffEditing: function() {
       this.$el.removeClass('is-editing')
