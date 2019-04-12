@@ -32,10 +32,10 @@ const properties = require('../../js/properties.js')
 const plugin = require('plugins/query-settings')
 const announcement = require('../announcement/index.jsx')
 import { InvalidSearchFormMessage } from 'component/announcement/CommonMessages'
+import TOGGLE from '../../react-component/radio/TOGGLE';
 const ResultForm = require('../result-form/result-form.js')
 
-const SpellcheckView = require('../dropdown/query-src/dropdown.query-src.view.js')
-var user = require('../../singletons/user-instance.js')
+var user = require('../singletons/user-instance.js')
 
 module.exports = plugin(
   Marionette.LayoutView.extend({
@@ -167,7 +167,12 @@ module.exports = plugin(
     },
     setupSpellcheck: function() {
       const userPreferences = user.get('user').get('preferences')
-
+      userPreferences.set('spellcheck', true)
+      this.spellcheckForm.show(
+        <TOGGLE>
+          HURRAY
+        </TOGGLE>
+      )
     },
     turnOffEditing: function() {
       this.$el.removeClass('is-editing')
