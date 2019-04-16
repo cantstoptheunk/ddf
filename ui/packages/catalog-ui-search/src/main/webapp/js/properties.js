@@ -167,6 +167,9 @@ var properties = {
   isUploadEnabled: function() {
     return this.showIngest
   },
+  isSpellcheckEnabled: function() {
+    return this.spellcheck
+  },
   isMetacardPreviewEnabled: function() {
     return !this.isMetacardPreviewDisabled
   },

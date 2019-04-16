@@ -14,6 +14,8 @@
  **/
 /*global define, setTimeout*/
 import * as React from 'react'
+import Toggle from '../../react-component/toggle/Toggle'
+import RadioComponent from '../../react-component/container/input-wrappers/radio'
 
 const Marionette = require('marionette')
 const Backbone = require('backbone')
@@ -32,7 +34,6 @@ const properties = require('../../js/properties.js')
 const plugin = require('plugins/query-settings')
 const announcement = require('../announcement/index.jsx')
 import { InvalidSearchFormMessage } from 'component/announcement/CommonMessages'
-import TOGGLE from '../../react-component/radio/TOGGLE';
 const ResultForm = require('../result-form/result-form.js')
 
 var user = require('../singletons/user-instance.js')
@@ -50,9 +51,9 @@ module.exports = plugin(
     },
     regions: {
       settingsSortField: '.settings-sorting-field',
+      spellcheckForm: '.spellcheck-form',
       settingsSrc: '.settings-src',
       resultForm: '.result-form',
-      spellcheckForm: '.spellcheck-form',
       extensions: '.query-extensions',
     },
     ui: {},
@@ -77,9 +78,9 @@ module.exports = plugin(
       this.renderResultForms(this.resultFormCollection.filteredList)
     },
     onBeforeShow: function() {
+      this.setupSpellcheck()
       this.setupSortFieldDropdown()
       this.setupSrcDropdown()
-      this.setupSpellcheck()
       this.turnOnEditing()
       this.renderResultForms(this.resultFormCollection.filteredList)
       this.setupExtensions()
@@ -166,13 +167,23 @@ module.exports = plugin(
       this.settingsSrc.currentView.turnOffEditing()
     },
     setupSpellcheck: function() {
-      const userPreferences = user.get('user').get('preferences')
-      userPreferences.set('spellcheck', true)
-      this.spellcheckForm.show(
-        <TOGGLE>
-          HURRAY
-        </TOGGLE>
-      )
+      if(!properties.isSpellcheckEnabled()){
+        return
+      }
+      const spellcheckView = Marionette.ItemView.extend({
+        template: () => <RadioComponent value={this.model.get('spellcheck')} label="Spellcheck" options={[{
+          label: 'Yes',
+          value: true
+        }, {
+          label: 'No',
+          value: false
+        }]}
+          onChange={(value) => {
+            this.model.set('spellcheck', value)
+          }}
+        />,
+      })
+      this.spellcheckForm.show(new spellcheckView())
     },
     turnOffEditing: function() {
       this.$el.removeClass('is-editing')
