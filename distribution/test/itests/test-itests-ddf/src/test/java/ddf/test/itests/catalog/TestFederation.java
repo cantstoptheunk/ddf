@@ -213,8 +213,6 @@ public class TestFederation extends AbstractIntegrationTest {
   public void beforeExam() throws Exception {
     try {
       waitForSystemReady();
-      getSecurityPolicy().configureRestForGuest();
-      waitForSystemReady();
 
       getCatalogBundle().setupMaxDownloadRetryAttempts(MAX_DOWNLOAD_RETRY_ATTEMPTS);
 
@@ -881,7 +879,7 @@ public class TestFederation extends AbstractIntegrationTest {
   }
 
   @Test
-  public void testListAllSourceInfo() throws Exception {
+  public void testListAllSourceInfo() {
 
     // TODO: Connected csw/wfs sources are broken. Ticket: DDF-1366
     /*
@@ -892,118 +890,99 @@ public class TestFederation extends AbstractIntegrationTest {
     }
     */
 
-    try {
-      getSecurityPolicy().configureRestForBasic();
-      given()
-          .auth()
-          .preemptive()
-          .basic(ADMIN_USERNAME, ADMIN_PASSWORD)
-          .header("X-Requested-With", "XMLHttpRequest")
-          .header("Origin", ADMIN_ALL_SOURCES_PATH.getUrl())
-          .when()
-          .get(ADMIN_ALL_SOURCES_PATH.getUrl())
-          .then()
-          .assertThat()
-          .body(
-              containsString("\"fpid\":\"OpenSearchSource\""),
-              containsString("\"fpid\":\"Csw_Federated_Source\"") /*,
+    given()
+        .auth()
+        .preemptive()
+        .basic(ADMIN_USERNAME, ADMIN_PASSWORD)
+        .header("X-Requested-With", "XMLHttpRequest")
+        .header("Origin", ADMIN_ALL_SOURCES_PATH.getUrl())
+        .when()
+        .get(ADMIN_ALL_SOURCES_PATH.getUrl())
+        .then()
+        .assertThat()
+        .body(
+            containsString("\"fpid\":\"OpenSearchSource\""),
+            containsString("\"fpid\":\"Csw_Federated_Source\"") /*,
                 containsString("\"fpid\":\"Csw_Connected_Source\"")*/);
-    } finally {
-      getSecurityPolicy().configureRestForGuest();
-    }
   }
 
   @Test
-  public void testFederatedSourceStatus() throws Exception {
+  public void testFederatedSourceStatus() {
+    // Find and test OpenSearch Federated Source
+    String json =
+        given()
+            .auth()
+            .preemptive()
+            .basic(ADMIN_USERNAME, ADMIN_PASSWORD)
+            .header("X-Requested-With", "XMLHttpRequest")
+            .header("Origin", ADMIN_ALL_SOURCES_PATH.getUrl())
+            .when()
+            .get(ADMIN_ALL_SOURCES_PATH.getUrl())
+            .asString();
 
-    try {
-      getSecurityPolicy().configureRestForBasic();
+    List<Map<String, Object>> sources =
+        with(json)
+            .param("name", "OpenSearchSource")
+            .get("value.findAll { source -> source.id == name}");
+    String openSearchPid =
+        (String)
+            ((ArrayList<Map<String, Object>>) (sources.get(0).get("configurations")))
+                .get(0)
+                .get("id");
 
-      // Find and test OpenSearch Federated Source
-      String json =
-          given()
-              .auth()
-              .preemptive()
-              .basic(ADMIN_USERNAME, ADMIN_PASSWORD)
-              .header("X-Requested-With", "XMLHttpRequest")
-              .header("Origin", ADMIN_ALL_SOURCES_PATH.getUrl())
-              .when()
-              .get(ADMIN_ALL_SOURCES_PATH.getUrl())
-              .asString();
-
-      List<Map<String, Object>> sources =
-          with(json)
-              .param("name", "OpenSearchSource")
-              .get("value.findAll { source -> source.id == name}");
-      String openSearchPid =
-          (String)
-              ((ArrayList<Map<String, Object>>) (sources.get(0).get("configurations")))
-                  .get(0)
-                  .get("id");
-
-      given()
-          .auth()
-          .basic(ADMIN_USERNAME, ADMIN_PASSWORD)
-          .header("X-Requested-With", "XMLHttpRequest")
-          .header("Origin", ADMIN_STATUS_PATH.getUrl())
-          .when()
-          .get(ADMIN_STATUS_PATH.getUrl() + openSearchPid)
-          .then()
-          .assertThat()
-          .body(containsString("\"value\":true"));
-    } finally {
-      getSecurityPolicy().configureRestForGuest();
-    }
+    given()
+        .auth()
+        .basic(ADMIN_USERNAME, ADMIN_PASSWORD)
+        .header("X-Requested-With", "XMLHttpRequest")
+        .header("Origin", ADMIN_STATUS_PATH.getUrl())
+        .when()
+        .get(ADMIN_STATUS_PATH.getUrl() + openSearchPid)
+        .then()
+        .assertThat()
+        .body(containsString("\"value\":true"));
   }
 
   // TODO: Connected csw/wfs sources are broken. Ticket: DDF-1366
   @Ignore
   @Test
-  public void testConnectedSourceStatus() throws Exception {
+  public void testConnectedSourceStatus() {
     try {
       setupConnectedSources();
     } catch (IOException e) {
       LOGGER.error("Couldn't create connected sources: {}", e);
     }
 
-    try {
-      getSecurityPolicy().configureRestForBasic();
+    String json =
+        given()
+            .auth()
+            .basic(ADMIN_USERNAME, ADMIN_PASSWORD)
+            .header("X-Requested-With", "XMLHttpRequest")
+            .header("Origin", ADMIN_ALL_SOURCES_PATH.getUrl())
+            .when()
+            .get(ADMIN_ALL_SOURCES_PATH.getUrl())
+            .asString();
 
-      String json =
-          given()
-              .auth()
-              .basic(ADMIN_USERNAME, ADMIN_PASSWORD)
-              .header("X-Requested-With", "XMLHttpRequest")
-              .header("Origin", ADMIN_ALL_SOURCES_PATH.getUrl())
-              .when()
-              .get(ADMIN_ALL_SOURCES_PATH.getUrl())
-              .asString();
+    List<Map<String, Object>> sources =
+        with(json)
+            .param("name", "Csw_Connected_Source")
+            .get("value.findAll { source -> source.id == name}");
+    String connectedSourcePid =
+        (String)
+            ((ArrayList<Map<String, Object>>) (sources.get(0).get("configurations")))
+                .get(0)
+                .get("id");
 
-      List<Map<String, Object>> sources =
-          with(json)
-              .param("name", "Csw_Connected_Source")
-              .get("value.findAll { source -> source.id == name}");
-      String connectedSourcePid =
-          (String)
-              ((ArrayList<Map<String, Object>>) (sources.get(0).get("configurations")))
-                  .get(0)
-                  .get("id");
-
-      // Test CSW Connected Source status
-      given()
-          .auth()
-          .basic(ADMIN_USERNAME, ADMIN_PASSWORD)
-          .header("X-Requested-With", "XMLHttpRequest")
-          .header("Origin", ADMIN_STATUS_PATH.getUrl())
-          .when()
-          .get(ADMIN_STATUS_PATH.getUrl() + connectedSourcePid)
-          .then()
-          .assertThat()
-          .body(containsString("\"value\":true"));
-
-    } finally {
-      getSecurityPolicy().configureRestForGuest();
-    }
+    // Test CSW Connected Source status
+    given()
+        .auth()
+        .basic(ADMIN_USERNAME, ADMIN_PASSWORD)
+        .header("X-Requested-With", "XMLHttpRequest")
+        .header("Origin", ADMIN_STATUS_PATH.getUrl())
+        .when()
+        .get(ADMIN_STATUS_PATH.getUrl() + connectedSourcePid)
+        .then()
+        .assertThat()
+        .body(containsString("\"value\":true"));
   }
 
   @Test
@@ -1305,67 +1284,63 @@ public class TestFederation extends AbstractIntegrationTest {
    */
   @Test
   public void testRetrievalReliablility() throws Exception {
-    try {
-      getSecurityPolicy()
-          .configureWebContextPolicy("/=SAML|basic,/solr=SAML|PKI|basic", null, null);
+    getSecurityPolicy()
+        .configureWebContextPolicy(null, "/=SAML|basic,/solr=SAML|PKI|basic", null, null);
 
-      String filename = "product2.txt";
-      String metacardId = generateUniqueMetacardId();
-      String resourceData = getResourceData(metacardId);
-      Action response =
-          new ChunkedContent.ChunkedContentBuilder(resourceData)
-              .delayBetweenChunks(Duration.ofMillis(200))
-              .fail(2)
-              .build();
+    String filename = "product2.txt";
+    String metacardId = generateUniqueMetacardId();
+    String resourceData = getResourceData(metacardId);
+    Action response =
+        new ChunkedContent.ChunkedContentBuilder(resourceData)
+            .delayBetweenChunks(Duration.ofMillis(200))
+            .fail(2)
+            .build();
 
-      cswServer
-          .whenHttp()
-          .match(
-              Condition.post("/services/csw"),
-              withPostBodyContaining("GetRecords"),
-              withPostBodyContaining(metacardId))
-          .then(
-              ok(),
-              contentType("text/xml"),
-              bytesContent(getCswQueryResponse(metacardId).getBytes()));
+    cswServer
+        .whenHttp()
+        .match(
+            Condition.post("/services/csw"),
+            withPostBodyContaining("GetRecords"),
+            withPostBodyContaining(metacardId))
+        .then(
+            ok(),
+            contentType("text/xml"),
+            bytesContent(getCswQueryResponse(metacardId).getBytes()));
 
-      cswServer
-          .whenHttp()
-          .match(
-              Condition.get("/services/csw"),
-              Condition.parameter("request", "GetRecordById"),
-              Condition.parameter("id", metacardId))
-          .then(getCswRetrievalHeaders(filename), response);
+    cswServer
+        .whenHttp()
+        .match(
+            Condition.get("/services/csw"),
+            Condition.parameter("request", "GetRecordById"),
+            Condition.parameter("id", metacardId))
+        .then(getCswRetrievalHeaders(filename), response);
 
-      String restUrl =
-          REST_PATH.getUrl()
-              + "sources/"
-              + CSW_STUB_SOURCE_ID
-              + "/"
-              + metacardId
-              + "?transform=resource";
+    String restUrl =
+        REST_PATH.getUrl()
+            + "sources/"
+            + CSW_STUB_SOURCE_ID
+            + "/"
+            + metacardId
+            + "?transform=resource";
 
-      // Verify that the testData from the csw stub server is returned.
-      given()
-          .auth()
-          .preemptive()
-          .basic(LOCALHOST_USERNAME, LOCALHOST_PASSWORD)
-          .get(restUrl)
-          .then()
-          .assertThat()
-          .contentType("text/plain")
-          .body(is(resourceData));
+    // Verify that the testData from the csw stub server is returned.
+    given()
+        .auth()
+        .preemptive()
+        .basic(LOCALHOST_USERNAME, LOCALHOST_PASSWORD)
+        .get(restUrl)
+        .then()
+        .assertThat()
+        .contentType("text/plain")
+        .body(is(resourceData));
 
-      cswServer
-          .verifyHttp()
-          .times(
-              3,
-              Condition.uri("/services/csw"),
-              Condition.parameter("request", "GetRecordById"),
-              Condition.parameter("id", metacardId));
-    } finally {
-      getSecurityPolicy().configureRestForGuest();
-    }
+    cswServer
+        .verifyHttp()
+        .times(
+            3,
+            Condition.uri("/services/csw"),
+            Condition.parameter("request", "GetRecordById"),
+            Condition.parameter("id", metacardId));
   }
 
   /**
@@ -1485,70 +1460,59 @@ public class TestFederation extends AbstractIntegrationTest {
   @Test
   public void testMetacardCache() throws Exception {
 
-    try {
-      getSecurityPolicy().configureRestForBasic();
+    // Start with a clean cache
+    clearCache();
+    String cqlUrl = SEARCH_ROOT + "/catalog/internal/cql";
 
-      // Start with a clean cache
-      clearCache();
-      String cqlUrl = SEARCH_ROOT + "/catalog/internal/cql";
+    String srcRequest =
+        "{\"src\":\""
+            + OPENSEARCH_SOURCE_ID
+            + "\",\"start\":1,\"count\":250,\"cql\":\"anyText ILIKE '*'\",\"sort\":\"modified:desc\"}";
 
-      String srcRequest =
-          "{\"src\":\""
-              + OPENSEARCH_SOURCE_ID
-              + "\",\"start\":1,\"count\":250,\"cql\":\"anyText ILIKE '*'\",\"sort\":\"modified:desc\"}";
+    expect("Waiting for metacard cache to clear")
+        .checkEvery(1, SECONDS)
+        .within(20, SECONDS)
+        .until(() -> getMetacardCacheSize(OPENSEARCH_SOURCE_ID) == 0);
 
-      expect("Waiting for metacard cache to clear")
-          .checkEvery(1, SECONDS)
-          .within(20, SECONDS)
-          .until(() -> getMetacardCacheSize(OPENSEARCH_SOURCE_ID) == 0);
+    // This query will put the ingested metacards from the BeforeExam method into the cache
+    given()
+        .log()
+        .all()
+        .contentType("application/json")
+        .auth()
+        .basic(LOCALHOST_USERNAME, LOCALHOST_PASSWORD)
+        .header("X-Requested-With", "XMLHttpRequest")
+        .header("Origin", cqlUrl)
+        .body(srcRequest)
+        .when()
+        .post(cqlUrl)
+        .then()
+        .log()
+        .all()
+        .statusCode(200);
 
-      // This query will put the ingested metacards from the BeforeExam method into the cache
-      given()
-          .log()
-          .all()
-          .contentType("application/json")
-          .auth()
-          .basic(LOCALHOST_USERNAME, LOCALHOST_PASSWORD)
-          .header("X-Requested-With", "XMLHttpRequest")
-          .header("Origin", cqlUrl)
-          .body(srcRequest)
-          .when()
-          .post(cqlUrl)
-          .then()
-          .log()
-          .all()
-          .statusCode(200);
-
-      // CacheBulkProcessor could take up to 10 seconds to flush the cached results into solr
-      expect("Waiting for metacards to be written to cache")
-          .checkEvery(1, SECONDS)
-          .within(20, SECONDS)
-          .until(() -> getMetacardCacheSize(OPENSEARCH_SOURCE_ID) > 0);
-
-    } finally {
-      getSecurityPolicy().configureRestForGuest();
-    }
+    // CacheBulkProcessor could take up to 10 seconds to flush the cached results into solr
+    expect("Waiting for metacards to be written to cache")
+        .checkEvery(1, SECONDS)
+        .within(20, SECONDS)
+        .until(() -> getMetacardCacheSize(OPENSEARCH_SOURCE_ID) > 0);
   }
 
   @Test
   public void testEnterpriseSearch() throws Exception {
 
-    try {
-      String queryUrl = OPENSEARCH_PATH.getUrl() + "?q=" + RECORD_TITLE_1 + "&format=xml";
-      given()
-          .auth()
-          .basic(LOCALHOST_USERNAME, LOCALHOST_PASSWORD)
-          .get(queryUrl)
-          .then()
-          .statusCode(200)
-          .assertThat()
-          .body(
-              hasXPath("/metacards/metacard/source[text()='ddf.distribution']"),
-              hasXPath("/metacards/metacard/source[text()='" + OPENSEARCH_SOURCE_ID + "']"),
-              hasXPath("/metacards/metacard/source[text()='" + CSW_SOURCE_ID + "']"));
-    } finally {
-      getSecurityPolicy().configureRestForGuest();
-    }
+    String queryUrl = OPENSEARCH_PATH.getUrl() + "?q=" + RECORD_TITLE_1 + "&format=xml";
+    given()
+        .auth()
+        .basic(LOCALHOST_USERNAME, LOCALHOST_PASSWORD)
+        .get(queryUrl)
+        .then()
+        .statusCode(200)
+        .assertThat()
+        .body(
+            hasXPath("/metacards/metacard/source[text()='ddf.distribution']"),
+            hasXPath("/metacards/metacard/source[text()='" + OPENSEARCH_SOURCE_ID + "']"),
+            hasXPath("/metacards/metacard/source[text()='" + CSW_SOURCE_ID + "']"));
   }
 
   /**
@@ -1733,54 +1697,46 @@ public class TestFederation extends AbstractIntegrationTest {
 
   @Test
   public void testCancelDownload() throws Exception {
-    try {
-      getCatalogBundle().setupCaching(true);
-      getSecurityPolicy()
-          .configureWebContextPolicy("/=SAML|basic,/solr=SAML|PKI|basic", null, null);
+    getCatalogBundle().setupCaching(true);
+    getSecurityPolicy()
+        .configureWebContextPolicy(null, "/=SAML|basic,/solr=SAML|PKI|basic", null, null);
 
-      String filename = testName + ".txt";
-      String metacardId = generateUniqueMetacardId();
-      String resourceData = getResourceData(metacardId);
-      Action response =
-          new ChunkedContent.ChunkedContentBuilder(resourceData)
-              .delayBetweenChunks(Duration.ofMillis(200))
-              .fail(0)
-              .build();
+    String filename = testName + ".txt";
+    String metacardId = generateUniqueMetacardId();
+    String resourceData = getResourceData(metacardId);
+    Action response =
+        new ChunkedContent.ChunkedContentBuilder(resourceData)
+            .delayBetweenChunks(Duration.ofMillis(200))
+            .fail(0)
+            .build();
 
-      cswServer
-          .whenHttp()
-          .match(
-              Condition.post("/services/csw"),
-              withPostBodyContaining("GetRecords"),
-              withPostBodyContaining(metacardId))
-          .then(
-              ok(),
-              contentType("text/xml"),
-              bytesContent(getCswQueryResponse(metacardId).getBytes()));
+    cswServer
+        .whenHttp()
+        .match(
+            Condition.post("/services/csw"),
+            withPostBodyContaining("GetRecords"),
+            withPostBodyContaining(metacardId))
+        .then(
+            ok(),
+            contentType("text/xml"),
+            bytesContent(getCswQueryResponse(metacardId).getBytes()));
 
-      cswServer
-          .whenHttp()
-          .match(
-              Condition.get("/services/csw"),
-              Condition.parameter("request", "GetRecordById"),
-              Condition.parameter("id", metacardId))
-          .then(getCswRetrievalHeaders(filename), response);
+    cswServer
+        .whenHttp()
+        .match(
+            Condition.get("/services/csw"),
+            Condition.parameter("request", "GetRecordById"),
+            Condition.parameter("id", metacardId))
+        .then(getCswRetrievalHeaders(filename), response);
 
-      String startDownloadUrl =
-          RESOURCE_DOWNLOAD_ENDPOINT_ROOT.getUrl()
-              + "?source="
-              + CSW_STUB_SOURCE_ID
-              + "&metacard="
-              + metacardId;
+    String startDownloadUrl =
+        RESOURCE_DOWNLOAD_ENDPOINT_ROOT.getUrl()
+            + "?source="
+            + CSW_STUB_SOURCE_ID
+            + "&metacard="
+            + metacardId;
 
-      given()
-          .auth()
-          .preemptive()
-          .basic(LOCALHOST_USERNAME, LOCALHOST_PASSWORD)
-          .get(startDownloadUrl);
-    } finally {
-      getSecurityPolicy().configureRestForGuest();
-    }
+    given().auth().preemptive().basic(LOCALHOST_USERNAME, LOCALHOST_PASSWORD).get(startDownloadUrl);
   }
 
   @Ignore
@@ -1864,192 +1820,180 @@ public class TestFederation extends AbstractIntegrationTest {
 
   @Test
   public void testProductDownloadWithTwoUsers() throws Exception {
-    try {
-      getSecurityPolicy()
-          .configureWebContextPolicy("/=SAML|basic,/solr=SAML|PKI|basic", null, null);
+    getSecurityPolicy()
+        .configureWebContextPolicy(null, "/=SAML|basic,/solr=SAML|PKI|basic", null, null);
 
-      String filename1 = "product4.txt";
-      String metacardId1 = generateUniqueMetacardId();
-      String resourceData1 = getResourceData(metacardId1);
-      Action response1 = new ChunkedContent.ChunkedContentBuilder(resourceData1).build();
+    String filename1 = "product4.txt";
+    String metacardId1 = generateUniqueMetacardId();
+    String resourceData1 = getResourceData(metacardId1);
+    Action response1 = new ChunkedContent.ChunkedContentBuilder(resourceData1).build();
 
-      cswServer
-          .whenHttp()
-          .match(
-              Condition.post("/services/csw"),
-              withPostBodyContaining("GetRecords"),
-              withPostBodyContaining(metacardId1))
-          .then(
-              ok(),
-              contentType("text/xml"),
-              bytesContent(getCswQueryResponse(metacardId1).getBytes()));
+    cswServer
+        .whenHttp()
+        .match(
+            Condition.post("/services/csw"),
+            withPostBodyContaining("GetRecords"),
+            withPostBodyContaining(metacardId1))
+        .then(
+            ok(),
+            contentType("text/xml"),
+            bytesContent(getCswQueryResponse(metacardId1).getBytes()));
 
-      cswServer
-          .whenHttp()
-          .match(
-              Condition.get("/services/csw"),
-              Condition.parameter("request", "GetRecordById"),
-              Condition.parameter("id", metacardId1))
-          .then(getCswRetrievalHeaders(filename1), response1);
+    cswServer
+        .whenHttp()
+        .match(
+            Condition.get("/services/csw"),
+            Condition.parameter("request", "GetRecordById"),
+            Condition.parameter("id", metacardId1))
+        .then(getCswRetrievalHeaders(filename1), response1);
 
-      String filename2 = "product5.txt";
-      String metacardId2 = generateUniqueMetacardId();
-      String resourceData2 = getResourceData(metacardId2);
-      Action response2 = new ChunkedContent.ChunkedContentBuilder(resourceData2).build();
+    String filename2 = "product5.txt";
+    String metacardId2 = generateUniqueMetacardId();
+    String resourceData2 = getResourceData(metacardId2);
+    Action response2 = new ChunkedContent.ChunkedContentBuilder(resourceData2).build();
 
-      cswServer
-          .whenHttp()
-          .match(
-              Condition.post("/services/csw"),
-              withPostBodyContaining("GetRecords"),
-              withPostBodyContaining(metacardId2))
-          .then(
-              ok(),
-              contentType("text/xml"),
-              bytesContent(getCswQueryResponse(metacardId2).getBytes()));
+    cswServer
+        .whenHttp()
+        .match(
+            Condition.post("/services/csw"),
+            withPostBodyContaining("GetRecords"),
+            withPostBodyContaining(metacardId2))
+        .then(
+            ok(),
+            contentType("text/xml"),
+            bytesContent(getCswQueryResponse(metacardId2).getBytes()));
 
-      cswServer
-          .whenHttp()
-          .match(
-              Condition.get("/services/csw"),
-              Condition.parameter("request", "GetRecordById"),
-              Condition.parameter("id", metacardId2))
-          .then(getCswRetrievalHeaders(filename2), response2);
+    cswServer
+        .whenHttp()
+        .match(
+            Condition.get("/services/csw"),
+            Condition.parameter("request", "GetRecordById"),
+            Condition.parameter("id", metacardId2))
+        .then(getCswRetrievalHeaders(filename2), response2);
 
-      String resourceDownloadUrlAdminUser =
-          String.format(
-              "%ssources/%s/%s?transform=resource",
-              REST_PATH.getUrl(), CSW_STUB_SOURCE_ID, metacardId1);
+    String resourceDownloadUrlAdminUser =
+        String.format(
+            "%ssources/%s/%s?transform=resource",
+            REST_PATH.getUrl(), CSW_STUB_SOURCE_ID, metacardId1);
 
-      String resourceDownloadUrlLocalhostUser =
-          String.format(
-              "%ssources/%s/%s?transform=resource",
-              REST_PATH.getUrl(), CSW_STUB_SOURCE_ID, metacardId2);
+    String resourceDownloadUrlLocalhostUser =
+        String.format(
+            "%ssources/%s/%s?transform=resource",
+            REST_PATH.getUrl(), CSW_STUB_SOURCE_ID, metacardId2);
 
-      given()
-          .auth()
-          .preemptive()
-          .basic(ADMIN_USERNAME, ADMIN_PASSWORD)
-          .when()
-          .get(resourceDownloadUrlAdminUser)
-          .then()
-          .assertThat()
-          .contentType("text/plain")
-          .body(is(resourceData1));
-      given()
-          .auth()
-          .preemptive()
-          .basic(LOCALHOST_USERNAME, LOCALHOST_PASSWORD)
-          .get(resourceDownloadUrlLocalhostUser)
-          .then()
-          .assertThat()
-          .contentType("text/plain")
-          .body(is(resourceData2));
+    given()
+        .auth()
+        .preemptive()
+        .basic(ADMIN_USERNAME, ADMIN_PASSWORD)
+        .when()
+        .get(resourceDownloadUrlAdminUser)
+        .then()
+        .assertThat()
+        .contentType("text/plain")
+        .body(is(resourceData1));
+    given()
+        .auth()
+        .preemptive()
+        .basic(LOCALHOST_USERNAME, LOCALHOST_PASSWORD)
+        .get(resourceDownloadUrlLocalhostUser)
+        .then()
+        .assertThat()
+        .contentType("text/plain")
+        .body(is(resourceData2));
 
-      cswServer
-          .verifyHttp()
-          .times(
-              1,
-              Condition.uri("/services/csw"),
-              Condition.parameter("request", "GetRecordById"),
-              Condition.parameter("id", metacardId1));
+    cswServer
+        .verifyHttp()
+        .times(
+            1,
+            Condition.uri("/services/csw"),
+            Condition.parameter("request", "GetRecordById"),
+            Condition.parameter("id", metacardId1));
 
-      cswServer
-          .verifyHttp()
-          .times(
-              1,
-              Condition.uri("/services/csw"),
-              Condition.parameter("request", "GetRecordById"),
-              Condition.parameter("id", metacardId2));
-    } finally {
-      getSecurityPolicy().configureRestForGuest();
-    }
+    cswServer
+        .verifyHttp()
+        .times(
+            1,
+            Condition.uri("/services/csw"),
+            Condition.parameter("request", "GetRecordById"),
+            Condition.parameter("id", metacardId2));
   }
 
   @Test
   public void testSingleUserDownloadSameProductSyncAndAsync() throws Exception {
-    try {
-      getCatalogBundle().setupCaching(true);
-      getSecurityPolicy()
-          .configureWebContextPolicy("/=SAML|basic,/solr=SAML|PKI|basic", null, null);
+    getCatalogBundle().setupCaching(true);
+    getSecurityPolicy()
+        .configureWebContextPolicy(null, "/=SAML|basic,/solr=SAML|PKI|basic", null, null);
 
-      String filename = "product4.txt";
-      String metacardId = generateUniqueMetacardId();
-      String resourceData = getResourceData(metacardId);
+    String filename = "product4.txt";
+    String metacardId = generateUniqueMetacardId();
+    String resourceData = getResourceData(metacardId);
 
-      setupStubCswResponse(filename, metacardId, resourceData);
+    setupStubCswResponse(filename, metacardId, resourceData);
 
-      String resourceDownloadUrlLocalhostUserSync =
-          REST_PATH.getUrl()
-              + "sources/"
-              + CSW_STUB_SOURCE_ID
-              + "/"
-              + metacardId
-              + "?transform=resource";
+    String resourceDownloadUrlLocalhostUserSync =
+        REST_PATH.getUrl()
+            + "sources/"
+            + CSW_STUB_SOURCE_ID
+            + "/"
+            + metacardId
+            + "?transform=resource";
 
-      String resourceDownloadUrlLocalhostUserAsync =
-          RESOURCE_DOWNLOAD_ENDPOINT_ROOT.getUrl()
-              + "?source="
-              + CSW_STUB_SOURCE_ID
-              + "&metacard="
-              + metacardId;
+    String resourceDownloadUrlLocalhostUserAsync =
+        RESOURCE_DOWNLOAD_ENDPOINT_ROOT.getUrl()
+            + "?source="
+            + CSW_STUB_SOURCE_ID
+            + "&metacard="
+            + metacardId;
 
-      // Download product via async and then sync, should only call the stub server to download once
-      given()
-          .auth()
-          .preemptive()
-          .basic(ADMIN_USERNAME, ADMIN_PASSWORD)
-          .get(resourceDownloadUrlLocalhostUserAsync);
+    // Download product via async and then sync, should only call the stub server to download once
+    given()
+        .auth()
+        .preemptive()
+        .basic(ADMIN_USERNAME, ADMIN_PASSWORD)
+        .get(resourceDownloadUrlLocalhostUserAsync);
 
-      given()
-          .auth()
-          .preemptive()
-          .basic(ADMIN_USERNAME, ADMIN_PASSWORD)
-          .get(resourceDownloadUrlLocalhostUserSync);
+    given()
+        .auth()
+        .preemptive()
+        .basic(ADMIN_USERNAME, ADMIN_PASSWORD)
+        .get(resourceDownloadUrlLocalhostUserSync);
 
-      verifyCswStubCall(1, metacardId);
-    } finally {
-      getSecurityPolicy().configureRestForGuest();
-    }
+    verifyCswStubCall(1, metacardId);
   }
 
   @Test
   public void testSingleUserDownloadSameProductAsync() throws Exception {
-    try {
-      getCatalogBundle().setupCaching(true);
-      getSecurityPolicy()
-          .configureWebContextPolicy("/=SAML|basic,/solr=SAML|PKI|basic", null, null);
+    getCatalogBundle().setupCaching(true);
+    getSecurityPolicy()
+        .configureWebContextPolicy(null, "/=SAML|basic,/solr=SAML|PKI|basic", null, null);
 
-      String filename = "product4.txt";
-      String metacardId = generateUniqueMetacardId();
-      String resourceData = getResourceData(metacardId);
+    String filename = "product4.txt";
+    String metacardId = generateUniqueMetacardId();
+    String resourceData = getResourceData(metacardId);
 
-      setupStubCswResponse(filename, metacardId, resourceData);
+    setupStubCswResponse(filename, metacardId, resourceData);
 
-      String resourceDownloadUrlLocalhostUserAsync =
-          RESOURCE_DOWNLOAD_ENDPOINT_ROOT.getUrl()
-              + "?source="
-              + CSW_STUB_SOURCE_ID
-              + "&metacard="
-              + metacardId;
+    String resourceDownloadUrlLocalhostUserAsync =
+        RESOURCE_DOWNLOAD_ENDPOINT_ROOT.getUrl()
+            + "?source="
+            + CSW_STUB_SOURCE_ID
+            + "&metacard="
+            + metacardId;
 
-      // Download product twice via async, should only call the stub server to download once
-      given()
-          .auth()
-          .preemptive()
-          .basic(ADMIN_USERNAME, ADMIN_PASSWORD)
-          .get(resourceDownloadUrlLocalhostUserAsync);
+    // Download product twice via async, should only call the stub server to download once
+    given()
+        .auth()
+        .preemptive()
+        .basic(ADMIN_USERNAME, ADMIN_PASSWORD)
+        .get(resourceDownloadUrlLocalhostUserAsync);
 
-      given()
-          .auth()
-          .preemptive()
-          .basic(ADMIN_USERNAME, ADMIN_PASSWORD)
-          .get(resourceDownloadUrlLocalhostUserAsync);
+    given()
+        .auth()
+        .preemptive()
+        .basic(ADMIN_USERNAME, ADMIN_PASSWORD)
+        .get(resourceDownloadUrlLocalhostUserAsync);
 
-      verifyCswStubCall(1, metacardId);
-    } finally {
-      getSecurityPolicy().configureRestForGuest();
-    }
+    verifyCswStubCall(1, metacardId);
   }
 
   private void setupStubCswResponse(String filename, String metacardId, String resourceData) {
@@ -2224,34 +2168,29 @@ public class TestFederation extends AbstractIntegrationTest {
     return String.format("Resource retrieval completed, %d bytes retrieved. ", bytesRetrieved);
   }
 
-  private int getMetacardCacheSize(String sourceId) throws Exception {
-    try {
-      getSecurityPolicy().configureRestForBasic();
-      String cqlUrl = SEARCH_ROOT + "/catalog/internal/cql";
+  private int getMetacardCacheSize(String sourceId) {
+    String cqlUrl = SEARCH_ROOT + "/catalog/internal/cql";
 
-      String cacheRequest =
-          "{\"src\":\"cache\",\"start\":1,\"count\":250,\"cql\":\"((anyText ILIKE '*') AND ((\\\"metacard_source\\\" = '"
-              + sourceId
-              + "')))\",\"sort\":\"modified:desc\"}";
+    String cacheRequest =
+        "{\"src\":\"cache\",\"start\":1,\"count\":250,\"cql\":\"((anyText ILIKE '*') AND ((\\\"metacard_source\\\" = '"
+            + sourceId
+            + "')))\",\"sort\":\"modified:desc\"}";
 
-      return given()
-          .contentType("application/json")
-          .auth()
-          .basic(LOCALHOST_USERNAME, LOCALHOST_PASSWORD)
-          .header("X-Requested-With", "XMLHttpRequest")
-          .header("Origin", cqlUrl)
-          .body(cacheRequest)
-          .when()
-          .post(cqlUrl)
-          .then()
-          .statusCode(200)
-          .extract()
-          .body()
-          .jsonPath()
-          .getInt("status.hits");
-    } finally {
-      getSecurityPolicy().configureRestForGuest();
-    }
+    return given()
+        .contentType("application/json")
+        .auth()
+        .basic(LOCALHOST_USERNAME, LOCALHOST_PASSWORD)
+        .header("X-Requested-With", "XMLHttpRequest")
+        .header("Origin", cqlUrl)
+        .body(cacheRequest)
+        .when()
+        .post(cqlUrl)
+        .then()
+        .statusCode(200)
+        .extract()
+        .body()
+        .jsonPath()
+        .getInt("status.hits");
   }
 
   @Override

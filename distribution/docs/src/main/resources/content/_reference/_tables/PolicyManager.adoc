@@ -23,6 +23,13 @@
 |20
 |true
 
+|Context Realms
+|realms
+|String
+|List of realms supporting each context. Karaf is provided by default. Example: /=karaf
+|/=karaf
+|true
+
 |Authentication Types
 |authenticationTypes
 |String

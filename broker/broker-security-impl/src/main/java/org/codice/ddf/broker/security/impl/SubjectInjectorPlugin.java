@@ -31,8 +31,7 @@ import org.apache.activemq.artemis.core.transaction.Transaction;
 import org.apache.activemq.artemis.protocol.amqp.broker.AMQPMessage;
 import org.apache.qpid.proton.amqp.messaging.ApplicationProperties;
 import org.codice.ddf.broker.security.api.BrokerMessageInterceptor;
-import org.codice.ddf.security.handler.api.BaseAuthenticationToken;
-import org.codice.ddf.security.handler.api.BaseAuthenticationTokenFactory;
+import org.codice.ddf.security.handler.api.UPAuthenticationToken;
 import org.codice.ddf.security.util.SAMLUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,9 +120,8 @@ public class SubjectInjectorPlugin implements BrokerMessageInterceptor {
 
   @VisibleForTesting
   Subject cacheAndReturnSubject(ServerSession session) throws SecurityServiceException {
-    BaseAuthenticationToken usernamePasswordToken =
-        new BaseAuthenticationTokenFactory()
-            .fromUsernamePassword(session.getUsername(), session.getPassword());
+    UPAuthenticationToken usernamePasswordToken =
+        new UPAuthenticationToken(session.getUsername(), session.getPassword());
     return securityManager.getSubject(usernamePasswordToken);
   }
 }

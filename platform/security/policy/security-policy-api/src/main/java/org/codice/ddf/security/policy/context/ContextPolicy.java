@@ -24,21 +24,34 @@ public interface ContextPolicy {
    * Setting that can be used in a header or attribute to signify that the policy on that current
    * message does not require authentication.
    */
-  String NO_AUTH_POLICY = "org.codice.ddf.security.policy.no_authentication";
+  public static final String NO_AUTH_POLICY = "org.codice.ddf.security.policy.no_authentication";
+
+  /**
+   * Attribute name to identify the realm for which this policy applies. Set on the request so that
+   * all classes processing the request have easy access to the realm name.
+   */
+  public static final String ACTIVE_REALM = "org.codice.ddf.security.policy.realm";
 
   /**
    * Returns the context path that this policy covers.
    *
    * @return context path
    */
-  String getContextPath();
+  public String getContextPath();
+
+  /**
+   * Returns the realm that this policy utilizes.
+   *
+   * @return realm name
+   */
+  public String getRealm();
 
   /**
    * Returns a {@link java.util.Collection} of authentication methods
    *
    * @return authentication methods
    */
-  Collection<String> getAuthenticationMethods();
+  public Collection<String> getAuthenticationMethods();
 
   /**
    * Returns a {@link ddf.security.permission.CollectionPermission} object built from the attribute
@@ -46,19 +59,19 @@ public interface ContextPolicy {
    *
    * @return permissions
    */
-  CollectionPermission getAllowedAttributePermissions();
+  public CollectionPermission getAllowedAttributePermissions();
 
   /**
    * Returns a {@link java.util.Collection} of attribute names.
    *
    * @return all attribute names used in this policy
    */
-  Collection<String> getAllowedAttributeNames();
+  public Collection<String> getAllowedAttributeNames();
 
   /**
    * Returns a{@link java.util.Collection} of attributes
    *
    * @return all attributes the policy uses
    */
-  Collection<ContextAttributeMapping> getAllowedAttributes();
+  public Collection<ContextAttributeMapping> getAllowedAttributes();
 }

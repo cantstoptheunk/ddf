@@ -32,8 +32,7 @@ import org.apache.ftpserver.usermanager.UsernamePasswordAuthentication;
 import org.apache.ftpserver.usermanager.impl.ConcurrentLoginPermission;
 import org.apache.ftpserver.usermanager.impl.TransferRatePermission;
 import org.apache.ftpserver.usermanager.impl.WritePermission;
-import org.codice.ddf.security.handler.api.BaseAuthenticationToken;
-import org.codice.ddf.security.handler.api.BaseAuthenticationTokenFactory;
+import org.codice.ddf.security.handler.api.UPAuthenticationToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,19 +90,18 @@ public class UserManagerImpl implements UserManager {
    * @throws AuthenticationFailedException upon unsuccessful authorization
    */
   public User authenticate(Authentication authentication) throws AuthenticationFailedException {
-    BaseAuthenticationToken authenticationToken;
+    UPAuthenticationToken upAuthenticationToken;
     String username;
     User user;
 
     if (authentication instanceof UsernamePasswordAuthentication) {
       username = ((UsernamePasswordAuthentication) authentication).getUsername();
-      authenticationToken =
-          new BaseAuthenticationTokenFactory()
-              .fromUsernamePassword(
-                  username, ((UsernamePasswordAuthentication) authentication).getPassword());
+      upAuthenticationToken =
+          new UPAuthenticationToken(
+              username, ((UsernamePasswordAuthentication) authentication).getPassword());
 
       try {
-        Subject subject = securityManager.getSubject(authenticationToken);
+        Subject subject = securityManager.getSubject(upAuthenticationToken);
 
         if (subject != null) {
           if (!doesExist(username)) {

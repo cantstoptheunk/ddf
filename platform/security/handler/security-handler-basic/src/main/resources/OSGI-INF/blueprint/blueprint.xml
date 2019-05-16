@@ -15,8 +15,23 @@
            xsi:schemaLocation="
   http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
 
-    <bean id="handler" class="org.codice.ddf.security.handler.basic.BasicAuthenticationHandler"/>
+    <reference id="xmlParser" interface="org.codice.ddf.parser.Parser" filter="(id=xml)"
+               availability="mandatory"/>
 
-    <service ref="handler" interface="org.codice.ddf.security.handler.api.AuthenticationHandler" ranking="50"/>
+    <bean id="handler" class="org.codice.ddf.security.handler.basic.BasicAuthenticationHandler">
+    </bean>
+
+    <service ref="handler" interface="org.codice.ddf.security.handler.api.AuthenticationHandler"
+             ranking="50">
+    </service>
+
+    <bean id="wsshandler"
+          class="org.codice.ddf.security.handler.basic.WssBasicAuthenticationHandler">
+        <argument ref="xmlParser"/>
+    </bean>
+
+    <service ref="wsshandler" interface="org.codice.ddf.security.handler.api.AuthenticationHandler"
+             ranking="50">
+    </service>
 
 </blueprint>

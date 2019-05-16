@@ -137,7 +137,7 @@ class Configuration extends React.Component<Props, State> {
           {fpid ? (
             <Button
               color="secondary"
-              onClick={(e: { preventDefault: () => void }) => {
+              onClick={e => {
                 e.preventDefault()
                 var question =
                   'Are you sure you want to remove the configuration: ' +

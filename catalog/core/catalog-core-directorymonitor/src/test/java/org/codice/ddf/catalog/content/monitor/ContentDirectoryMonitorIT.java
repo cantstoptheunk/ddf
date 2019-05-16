@@ -347,12 +347,7 @@ public class ContentDirectoryMonitorIT extends AbstractComponentTest {
         new BundleInfo("com.hazelcast", "hazelcast"),
         new BundleInfo("net.jodah", "failsafe"),
         new BundleInfo("ddf.platform", "bootflag-api"),
-        new BundleInfo("ddf.catalog.transformer", "catalog-transformer-bootflag"),
-        new BundleInfo("org.apache.cxf", "cxf-rt-rs-security-jose"),
-        new BundleInfo("org.apache.cxf", "cxf-rt-rs-security-jose-jaxrs"),
-        new BundleInfo("org.apache.cxf.services.sts", "cxf-services-sts-core"),
-        new BundleInfo("ddf.platform", "platform-parser-xml"),
-        new BundleInfo("ddf.platform", "platform-parser-api"));
+        new BundleInfo("ddf.catalog.transformer", "catalog-transformer-bootflag"));
   }
 
   private CatalogFramework mockCatalogFramework() throws Exception {

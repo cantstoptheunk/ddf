@@ -28,15 +28,20 @@ import org.apache.cxf.sts.claims.ClaimsHandler;
 import org.apache.cxf.sts.claims.ClaimsParameters;
 import org.apache.cxf.sts.claims.ProcessedClaim;
 import org.apache.cxf.sts.claims.ProcessedClaimCollection;
+import org.apache.cxf.sts.token.realm.RealmSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Provides claims for a guest auth token. */
-public class GuestClaimsHandler implements ClaimsHandler {
+public class GuestClaimsHandler implements ClaimsHandler, RealmSupport {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GuestClaimsHandler.class);
 
   private Map<URI, List<String>> claimsMap = new HashMap<>();
+
+  private List<String> supportedRealms;
+
+  private String realm;
 
   public GuestClaimsHandler() {
     LOGGER.debug("Starting GuestClaimsHandler");
@@ -124,5 +129,23 @@ public class GuestClaimsHandler implements ClaimsHandler {
     }
 
     return claimsColl;
+  }
+
+  @Override
+  public List<String> getSupportedRealms() {
+    return supportedRealms;
+  }
+
+  public void setSupportedRealms(List<String> supportedRealms) {
+    this.supportedRealms = supportedRealms;
+  }
+
+  @Override
+  public String getHandlerRealm() {
+    return realm;
+  }
+
+  public void setHandlerRealm(String realm) {
+    this.realm = realm;
   }
 }

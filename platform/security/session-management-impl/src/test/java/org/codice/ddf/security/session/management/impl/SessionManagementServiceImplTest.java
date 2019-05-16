@@ -37,6 +37,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Collections;
+import java.util.HashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilder;
@@ -86,7 +87,7 @@ public class SessionManagementServiceImplTest {
         .thenReturn(
             readXml(getClass().getClassLoader().getResourceAsStream("saml.xml"))
                 .getDocumentElement());
-    when(tokenHolder.getSecurityToken()).thenReturn(token);
+    when(tokenHolder.getRealmTokenMap()).thenReturn(Collections.singletonMap("idp", token));
     when(request.getSession(false)).thenReturn(session);
     when(session.getAttribute(SecurityConstants.SAML_ASSERTION)).thenReturn(tokenHolder);
     sessionManagementServiceImpl = new SessionManagementServiceImpl();
@@ -118,7 +119,11 @@ public class SessionManagementServiceImplTest {
     saml = saml.replace("2113", "2213");
     when(laterToken.getToken())
         .thenReturn(readXml(IOUtils.toInputStream(saml, "UTF-8")).getDocumentElement());
-    when(tokenHolder.getSecurityToken()).thenReturn(soonerToken);
+    HashMap<String, SecurityToken> tokenMap = new HashMap<>();
+    tokenMap.put("jaas", laterToken);
+    tokenMap.put("idp", token);
+    tokenMap.put("karaf", soonerToken);
+    when(tokenHolder.getRealmTokenMap()).thenReturn(tokenMap);
     String expiryString = sessionManagementServiceImpl.getExpiry(request);
     assertThat(expiryString, is("4206816594788"));
   }
@@ -127,7 +132,7 @@ public class SessionManagementServiceImplTest {
   public void testGetRenewal() {
     String renewalString = sessionManagementServiceImpl.getRenewal(request);
     assertNotNull(renewalString);
-    verify(tokenHolder).setSecurityToken(securityToken);
+    verify(tokenHolder).addSecurityToken("idp", securityToken);
   }
 
   @Test

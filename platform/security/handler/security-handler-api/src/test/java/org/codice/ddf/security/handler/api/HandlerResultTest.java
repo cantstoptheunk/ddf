@@ -13,6 +13,7 @@
  */
 package org.codice.ddf.security.handler.api;
 
+import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
@@ -28,9 +29,9 @@ public class HandlerResultTest {
     HandlerResult result = new HandlerResult();
     assertEquals(HandlerResult.Status.NO_ACTION, result.getStatus());
 
-    MockBSTAuthenticationToken token = new MockBSTAuthenticationToken("x", "y");
+    MockBSTAuthenticationToken token = new MockBSTAuthenticationToken("x", "y", "z");
     result = new HandlerResult(HandlerResult.Status.COMPLETED, token);
     assertEquals(HandlerResult.Status.COMPLETED, result.getStatus());
-    assertEquals(result.getToken(), token);
+    assertTrue(token == result.getToken());
   }
 }

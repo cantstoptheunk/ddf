@@ -30,8 +30,8 @@ import org.apache.cxf.transport.http.MessageTrustDecider;
 import org.apache.cxf.transport.http.URLConnectionInfo;
 import org.apache.cxf.transport.http.UntrustedURLConnectionIOException;
 import org.apache.cxf.transport.https.HttpsURLConnectionInfo;
-import org.codice.ddf.security.handler.api.BaseAuthenticationToken;
-import org.codice.ddf.security.handler.api.BaseAuthenticationTokenFactory;
+import org.codice.ddf.security.handler.api.PKIAuthenticationToken;
+import org.codice.ddf.security.handler.api.PKIAuthenticationTokenFactory;
 
 /**
  * OutgoingSubjectRetrievalInterceptor provides a implementation of {@link AbstractPhaseInterceptor}
@@ -43,13 +43,13 @@ public class OutgoingSubjectRetrievalInterceptor extends AbstractPhaseIntercepto
 
   private final SecurityManager securityManager;
 
-  private final BaseAuthenticationTokenFactory tokenFactory;
+  private final PKIAuthenticationTokenFactory tokenFactory;
 
   private EventSecurityEndingInterceptor ending = new EventSecurityEndingInterceptor();
 
   public OutgoingSubjectRetrievalInterceptor() {
     super(Phase.PRE_STREAM);
-    tokenFactory = new BaseAuthenticationTokenFactory();
+    tokenFactory = new PKIAuthenticationTokenFactory();
     tokenFactory.setSignaturePropertiesPath(
         System.getProperty("ddf.etc") + "/ws-security/server/signature.properties");
     tokenFactory.init();
@@ -117,7 +117,7 @@ public class OutgoingSubjectRetrievalInterceptor extends AbstractPhaseIntercepto
 
       X509Certificate[] certs = ((X509Certificate[]) info.getServerCertificates());
       try {
-        BaseAuthenticationToken token = tokenFactory.fromCertificates(certs);
+        PKIAuthenticationToken token = tokenFactory.getTokenFromCerts(certs, "*");
 
         Subject receiverSubject = securityManager.getSubject(token);
         message.put(Subject.class, receiverSubject);

@@ -22,34 +22,25 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Base64;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.HttpHeaders;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import org.codice.ddf.parser.Parser;
+import org.codice.ddf.parser.xml.XmlParser;
 import org.codice.ddf.platform.filter.FilterChain;
 import org.codice.ddf.security.handler.api.BaseAuthenticationToken;
 import org.codice.ddf.security.handler.api.HandlerResult;
+import org.codice.ddf.security.handler.api.UPAuthenticationToken;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 public class BasicAuthenticationHandlerTest {
 
   private static final String USERNAME = "admin";
 
   private static final String PASSWORD = "password";
-
-  private static final String USERNAME_ATTR = "Username";
-
-  private static final String PASSWORD_ATTR = "Password";
 
   private static final String CREDENTIALS = USERNAME + ":" + PASSWORD;
 
@@ -65,11 +56,13 @@ public class BasicAuthenticationHandlerTest {
     HttpServletResponse response = mock(HttpServletResponse.class);
     FilterChain chain = mock(FilterChain.class);
 
+    when(request.getAttribute(anyString())).thenReturn("karaf");
     HandlerResult result = handler.getNormalizedToken(request, response, chain, true);
 
     assertNotNull(result);
     assertEquals(HandlerResult.Status.REDIRECTED, result.getStatus());
     // confirm that the proper responses were sent through the HttpResponse
+    Mockito.verify(response).setHeader(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"karaf\"");
     Mockito.verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     Mockito.verify(response).setContentLength(0);
     Mockito.verify(response).flushBuffer();
@@ -80,13 +73,14 @@ public class BasicAuthenticationHandlerTest {
    * flag is set) - both requests without and with the credentials are tested.
    */
   @Test
-  public void testGetNormalizedTokenResolveWithCredentials() throws Exception {
+  public void testGetNormalizedTokenResolveWithCredentials() throws IOException {
     BasicAuthenticationHandler handler = new BasicAuthenticationHandler();
 
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
     FilterChain chain = mock(FilterChain.class);
 
+    when(request.getAttribute(anyString())).thenReturn("TestRealm");
     when(request.getHeader(HttpHeaders.AUTHORIZATION))
         .thenReturn("Basic " + Base64.getEncoder().encodeToString(CREDENTIALS.getBytes()));
 
@@ -94,8 +88,9 @@ public class BasicAuthenticationHandlerTest {
 
     assertNotNull(result);
     assertEquals(HandlerResult.Status.COMPLETED, result.getStatus());
-    assertEquals("admin", getXmlAttributeValue(result.getToken(), USERNAME_ATTR));
-    assertEquals("password", getXmlAttributeValue(result.getToken(), PASSWORD_ATTR));
+    assertEquals("admin", result.getToken().getPrincipal());
+    assertEquals("password", result.getToken().getCredentials());
+    assertEquals("TestRealm", result.getToken().getRealm());
 
     // confirm that no responses were sent through the HttpResponse
     Mockito.verify(response, never()).setHeader(anyString(), anyString());
@@ -109,7 +104,7 @@ public class BasicAuthenticationHandlerTest {
    * flag is set) and UsernameTokenType was created from the HTTP request.
    */
   @Test
-  public void testGetNormalizedTokenResolveCompleted() throws Exception {
+  public void testGetNormalizedTokenResolveCompleted() {
     BasicAuthenticationHandler handler = new BasicAuthenticationHandler();
 
     HttpServletRequest request = mock(HttpServletRequest.class);
@@ -123,7 +118,25 @@ public class BasicAuthenticationHandlerTest {
 
     assertNotNull(result);
     assertEquals(HandlerResult.Status.COMPLETED, result.getStatus());
-    assertEquals("admin", getXmlAttributeValue(result.getToken(), USERNAME_ATTR));
+    assertEquals("admin", result.getToken().getPrincipal());
+  }
+
+  /**
+   * This test case handles the scenario in which the credentials are not to be obtained (i.e.
+   * resolve flag is not set) and the UsernameTokenType could not be created with the HTTP request.
+   */
+  @Test
+  public void testGetNormalizedTokenNoResolveNoAction() {
+    BasicAuthenticationHandler handler = new BasicAuthenticationHandler();
+
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    FilterChain chain = mock(FilterChain.class);
+
+    HandlerResult result = handler.getNormalizedToken(request, response, chain, false);
+
+    assertNotNull(result);
+    assertEquals(HandlerResult.Status.NO_ACTION, result.getStatus());
   }
 
   /**
@@ -132,7 +145,7 @@ public class BasicAuthenticationHandlerTest {
    * request.
    */
   @Test
-  public void testGetNormalizedTokenNoResolveCompleted() throws Exception {
+  public void testGetNormalizedTokenNoResolveCompleted() {
     BasicAuthenticationHandler handler = new BasicAuthenticationHandler();
 
     HttpServletRequest request = mock(HttpServletRequest.class);
@@ -146,49 +159,63 @@ public class BasicAuthenticationHandlerTest {
 
     assertNotNull(result);
     assertEquals(HandlerResult.Status.COMPLETED, result.getStatus());
-    assertEquals("admin", getXmlAttributeValue(result.getToken(), USERNAME_ATTR));
+    assertEquals("admin", result.getToken().getPrincipal());
   }
 
   @Test
-  public void testExtractAuthInfo() throws Exception {
+  public void testExtractAuthInfo() {
+    Parser parser = new XmlParser();
     BasicAuthenticationHandler handler = new BasicAuthenticationHandler();
-    BaseAuthenticationToken result =
-        handler.extractAuthInfo(
-            "Basic " + Base64.getEncoder().encodeToString(CREDENTIALS.getBytes()));
+    UPAuthenticationToken result =
+        (UPAuthenticationToken)
+            handler.extractAuthInfo(
+                "Basic " + Base64.getEncoder().encodeToString(CREDENTIALS.getBytes()), "TestRealm");
     assertNotNull(result);
-    assertEquals("admin", getXmlAttributeValue(result, USERNAME_ATTR));
-    assertEquals("password", getXmlAttributeValue(result, PASSWORD_ATTR));
+    assertEquals("admin", result.getUsername());
+    assertEquals("password", result.getPassword());
+    assertEquals("TestRealm", result.getRealm());
 
-    handler = new BasicAuthenticationHandler();
-    result =
-        handler.extractAuthInfo(
-            "Basic " + Base64.getEncoder().encodeToString(CREDENTIALS.getBytes()));
-    assertNotNull(result);
-
-    result =
-        handler.extractAuthInfo(
-            "Basic " + Base64.getEncoder().encodeToString(":password".getBytes()));
-    assertNotNull(result);
-    assertEquals("", getXmlAttributeValue(result, USERNAME_ATTR));
-    assertEquals("password", getXmlAttributeValue(result, PASSWORD_ATTR));
+    WssBasicAuthenticationHandler wssHandler = new WssBasicAuthenticationHandler(parser);
+    BaseAuthenticationToken wssResult =
+        wssHandler.extractAuthInfo(
+            "Basic " + Base64.getEncoder().encodeToString(CREDENTIALS.getBytes()), "TestRealm");
+    assertNotNull(wssResult);
+    assertEquals("", wssResult.getRealm());
 
     result =
-        handler.extractAuthInfo("Basic " + Base64.getEncoder().encodeToString("user:".getBytes()));
+        (UPAuthenticationToken)
+            handler.extractAuthInfo(
+                "Basic " + Base64.getEncoder().encodeToString(":password".getBytes()), "TestRealm");
     assertNotNull(result);
-    assertEquals("user", getXmlAttributeValue(result, USERNAME_ATTR));
-    assertEquals("", getXmlAttributeValue(result, PASSWORD_ATTR));
+    assertEquals("", result.getUsername());
+    assertEquals("password", result.getPassword());
+    assertEquals("TestRealm", result.getRealm());
 
     result =
-        handler.extractAuthInfo(
-            "Basic " + Base64.getEncoder().encodeToString("user/password".getBytes()));
+        (UPAuthenticationToken)
+            handler.extractAuthInfo(
+                "Basic " + Base64.getEncoder().encodeToString("user:".getBytes()), "TestRealm");
+    assertNotNull(result);
+    assertEquals("user", result.getUsername());
+    assertEquals("", result.getPassword());
+    assertEquals("TestRealm", result.getRealm());
+
+    result =
+        (UPAuthenticationToken)
+            handler.extractAuthInfo(
+                "Basic " + Base64.getEncoder().encodeToString("user/password".getBytes()),
+                "TestRealm");
     assertNull(result);
 
-    result = handler.extractAuthInfo("Basic " + Base64.getEncoder().encodeToString("".getBytes()));
+    result =
+        (UPAuthenticationToken)
+            handler.extractAuthInfo(
+                "Basic " + Base64.getEncoder().encodeToString("".getBytes()), "TestRealm");
     assertNull(result);
   }
 
   @Test
-  public void testExtractAuthenticationInfo() throws Exception {
+  public void testExtractAuthenticationInfo() {
     // only test valid authorization header and missing header - invalid values are tested in
     // textExtractAuthInfo
     BasicAuthenticationHandler handler = new BasicAuthenticationHandler();
@@ -196,43 +223,41 @@ public class BasicAuthenticationHandlerTest {
 
     when(request.getHeader(HttpHeaders.AUTHORIZATION))
         .thenReturn("Basic " + Base64.getEncoder().encodeToString(CREDENTIALS.getBytes()));
+    when(request.getAttribute(anyString())).thenReturn("karaf");
 
-    BaseAuthenticationToken result = handler.extractAuthenticationInfo(request);
+    UPAuthenticationToken result =
+        (UPAuthenticationToken) handler.extractAuthenticationInfo(request);
     assertNotNull(result);
-    assertEquals("admin", getXmlAttributeValue(result, USERNAME_ATTR));
-    assertEquals("password", getXmlAttributeValue(result, PASSWORD_ATTR));
+    assertEquals("admin", result.getUsername());
+    assertEquals("password", result.getPassword());
+    assertEquals(BaseAuthenticationToken.DEFAULT_REALM, result.getRealm());
 
-    result = handler.extractAuthenticationInfo(request);
+    result = (UPAuthenticationToken) handler.extractAuthenticationInfo(request);
     assertNotNull(result);
-    assertEquals("admin", getXmlAttributeValue(result, USERNAME_ATTR));
-    assertEquals("password", getXmlAttributeValue(result, PASSWORD_ATTR));
+    assertEquals("admin", result.getUsername());
+    assertEquals("password", result.getPassword());
+    assertEquals("karaf", result.getRealm());
 
     when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(null);
-    result = handler.extractAuthenticationInfo(request);
+    result = (UPAuthenticationToken) handler.extractAuthenticationInfo(request);
     assertNull(result);
   }
 
-  private String getXmlAttributeValue(BaseAuthenticationToken token, String attribute)
-      throws ParserConfigurationException, IOException, SAXException {
-    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder builder = factory.newDocumentBuilder();
-    ByteArrayInputStream input =
-        new ByteArrayInputStream(token.getCredentialsAsXMLString().getBytes("UTF-8"));
-    Document doc = builder.parse(input);
-    NodeList children = doc.getDocumentElement().getChildNodes();
+  @Test(expected = IllegalStateException.class)
+  public void testIllegalStateException() {
+    BasicAuthenticationHandler handler = new BasicAuthenticationHandler();
+    UPAuthenticationToken result =
+        (UPAuthenticationToken)
+            handler.extractAuthInfo(
+                "Basic " + Base64.getEncoder().encodeToString(CREDENTIALS.getBytes()), "TestRealm");
+    assertNotNull(result);
+    assertEquals("admin", result.getUsername());
+    assertEquals("password", result.getPassword());
+    assertEquals("TestRealm", result.getRealm());
 
-    int childIndex = 0;
-    while (childIndex < children.getLength()) {
-      Node child = children.item(childIndex);
-      if (child.getNodeName().contains(attribute)) {
-        if (child.getFirstChild() != null) {
-          return child.getFirstChild().getNodeValue();
-        } else {
-          return "";
-        }
-      }
-      childIndex++;
-    }
-    return "";
+    WssBasicAuthenticationHandler wssHandler = new WssBasicAuthenticationHandler(null);
+    BaseAuthenticationToken wssResult =
+        wssHandler.extractAuthInfo(
+            "Basic " + Base64.getEncoder().encodeToString(CREDENTIALS.getBytes()), "TestRealm");
   }
 }

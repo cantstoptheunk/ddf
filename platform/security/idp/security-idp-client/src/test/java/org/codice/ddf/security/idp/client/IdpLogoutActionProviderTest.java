@@ -18,23 +18,21 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ddf.action.Action;
-import ddf.security.assertion.SecurityAssertion;
 import ddf.security.encryption.EncryptionService;
 import java.net.URLEncoder;
-import java.security.Principal;
+import java.util.HashMap;
 import junit.framework.Assert;
-import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.Subject;
 import org.junit.Before;
 import org.junit.Test;
 
 public class IdpLogoutActionProviderTest {
 
-  private IdpLogoutActionProvider idpLogoutActionProvider;
+  IdpLogoutActionProvider idpLogoutActionProvider;
 
   private EncryptionService encryptionService;
 
-  private String nameIdTime = "nameId\n" + System.currentTimeMillis();
+  String nameIdTime = "nameId\n" + System.currentTimeMillis();
 
   @Before
   public void setup() {
@@ -47,21 +45,10 @@ public class IdpLogoutActionProviderTest {
 
   @Test
   public void testGetAction() throws Exception {
-    SecurityAssertion assertion = mock(SecurityAssertion.class);
-    Principal principal = mock(Principal.class);
-    when(principal.getName()).thenReturn("name");
-
-    when(assertion.getPrincipal()).thenReturn(principal);
-    when(assertion.getTokenType())
-        .thenReturn("http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV2.0");
-
-    PrincipalCollection principalCollection = mock(PrincipalCollection.class);
-    when(principalCollection.oneByType(SecurityAssertion.class)).thenReturn(assertion);
-
     Subject subject = mock(Subject.class);
-    when(subject.getPrincipals()).thenReturn(principalCollection);
-
-    Action action = idpLogoutActionProvider.getAction(subject);
+    HashMap map = new HashMap();
+    map.put("idp", subject);
+    Action action = idpLogoutActionProvider.getAction(map);
     Assert.assertTrue(
         "Expected the encrypted nameId and time",
         action.getUrl().getQuery().contains(URLEncoder.encode(nameIdTime)));
@@ -70,8 +57,10 @@ public class IdpLogoutActionProviderTest {
   @Test
   public void testGetActionFailure() throws Exception {
     Object notsubject = new Object();
+    HashMap map = new HashMap();
+    map.put("idp", notsubject);
     when(encryptionService.encrypt(any(String.class))).thenReturn(nameIdTime);
-    Action action = idpLogoutActionProvider.getAction(notsubject);
-    Assert.assertNull("Expected the url to be null", action);
+    Action action = idpLogoutActionProvider.getAction(map);
+    Assert.assertNull("Expected the url to be null", action.getUrl());
   }
 }

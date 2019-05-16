@@ -14,25 +14,34 @@
 package ddf.security.common;
 
 import java.io.Serializable;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.cxf.ws.security.tokenstore.SecurityToken;
 
 public class SecurityTokenHolder implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  private final AtomicReference<SecurityToken> securityTokenAtomicReference =
-      new AtomicReference<>();
+  private final Map<String, SecurityToken> realmTokenMap = new ConcurrentHashMap<>();
 
-  public SecurityToken getSecurityToken() {
-    return securityTokenAtomicReference.get();
+  public SecurityToken getSecurityToken(String realm) {
+    return realmTokenMap.get(realm);
   }
 
-  public void setSecurityToken(SecurityToken securityToken) {
-    securityTokenAtomicReference.set(securityToken);
+  public void addSecurityToken(String realm, SecurityToken securityToken) {
+    realmTokenMap.put(realm, securityToken);
   }
 
-  public void remove() {
-    securityTokenAtomicReference.set(null);
+  public Map<String, SecurityToken> getRealmTokenMap() {
+    return Collections.unmodifiableMap(realmTokenMap);
+  }
+
+  public void remove(String realm) {
+    realmTokenMap.remove(realm);
+  }
+
+  public void removeAll() {
+    realmTokenMap.clear();
   }
 }

@@ -14,8 +14,18 @@
 package org.codice.ddf.security.handler.api;
 
 public class MockBSTAuthenticationToken extends BSTAuthenticationToken {
+  public static final String PRINCIPAL = "principal";
 
-  public MockBSTAuthenticationToken(Object p, Object c) {
-    super(p, c);
+  public static final String CREDS = "creds";
+
+  public static final String REALM = "realm";
+
+  public MockBSTAuthenticationToken(Object p, Object c, String r) {
+    super(p, c, r);
   }
+
+  //    public static BaseAuthenticationToken parse(String creds) {
+  //        return new MockBSTAuthenticationToken(PRINCIPAL, CREDS, REALM);
+  //    }
+
 }

@@ -65,6 +65,7 @@ public class WebSSOFilterTest {
   @Test
   public void testDoFilterWhiteListed() throws IOException, AuthenticationException {
     ContextPolicy testPolicy = mock(ContextPolicy.class);
+    when(testPolicy.getRealm()).thenReturn("TestRealm");
     ContextPolicyManager policyManager = mock(ContextPolicyManager.class);
     when(policyManager.getContextPolicy(anyString())).thenReturn(testPolicy);
     when(policyManager.isWhiteListed(anyString())).thenReturn(true);
@@ -100,6 +101,7 @@ public class WebSSOFilterTest {
 
     filter.doFilter(request, response, filterChain);
 
+    verify(request, times(1)).setAttribute(ContextPolicy.ACTIVE_REALM, "TestRealm");
     verify(request, times(1)).setAttribute(ContextPolicy.NO_AUTH_POLICY, true);
     verify(filterChain).doFilter(request, response);
     verify(handler1, never())
@@ -113,6 +115,7 @@ public class WebSSOFilterTest {
   @Test
   public void testDoFilterResolvingOnSecondCall() throws IOException, AuthenticationException {
     ContextPolicy testPolicy = mock(ContextPolicy.class);
+    when(testPolicy.getRealm()).thenReturn("TestRealm");
     ContextPolicyManager policyManager = mock(ContextPolicyManager.class);
     when(policyManager.getContextPolicy(anyString())).thenReturn(testPolicy);
     when(policyManager.isWhiteListed(anyString())).thenReturn(false);
@@ -166,6 +169,7 @@ public class WebSSOFilterTest {
   @Test
   public void testDoFilterWithRedirected() throws AuthenticationException, IOException {
     ContextPolicy testPolicy = mock(ContextPolicy.class);
+    when(testPolicy.getRealm()).thenReturn("TestRealm");
     ContextPolicyManager policyManager = mock(ContextPolicyManager.class);
     when(policyManager.getContextPolicy(anyString())).thenReturn(testPolicy);
     when(policyManager.isWhiteListed(anyString())).thenReturn(false);

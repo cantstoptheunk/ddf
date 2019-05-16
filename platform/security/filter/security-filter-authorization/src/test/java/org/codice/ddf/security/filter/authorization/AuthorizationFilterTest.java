@@ -143,6 +143,8 @@ public class AuthorizationFilterTest {
             new CollectionPermission(
                 PATH, new KeyValuePermission(PATH, Collections.singleton("permission"))));
     when(contextPolicy.getContextPath()).thenReturn(PATH);
+    when(contextPolicy.getRealm()).thenReturn("DDF");
+
     return contextPolicy;
   }
 

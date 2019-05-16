@@ -63,7 +63,10 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.name}</Bundle-Name>
-                        <Export-Package>org.codice.ddf.parser.xml</Export-Package>
+                        <Private-Package>
+                            org.codice.ddf.parser.xml
+                        </Private-Package>
+                        <!--<Export-Package>org.codice.ddf.parser.xml</Export-Package>-->
                     </instructions>
                 </configuration>
             </plugin>

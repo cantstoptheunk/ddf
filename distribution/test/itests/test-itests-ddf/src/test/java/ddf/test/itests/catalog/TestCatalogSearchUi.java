@@ -184,8 +184,7 @@ public class TestCatalogSearchUi extends AbstractIntegrationTest {
     return GSON.toJson(o);
   }
 
-  private RequestSpecification asGuest() throws Exception {
-    getSecurityPolicy().configureRestForGuest();
+  private static RequestSpecification asGuest() {
     return given()
         .log()
         .all()
@@ -193,8 +192,7 @@ public class TestCatalogSearchUi extends AbstractIntegrationTest {
         .header("X-Requested-With", "XMLHttpRequest");
   }
 
-  private RequestSpecification asUser(String username, String password) throws Exception {
-    getSecurityPolicy().configureRestForBasic();
+  private static RequestSpecification asUser(String username, String password) {
     return given()
         .log()
         .all()
@@ -205,8 +203,7 @@ public class TestCatalogSearchUi extends AbstractIntegrationTest {
         .header("X-Requested-With", "XMLHttpRequest");
   }
 
-  private RequestSpecification asAdmin() throws Exception {
-    getSecurityPolicy().configureRestForBasic();
+  private static RequestSpecification asAdmin() {
     return given()
         .log()
         .all()
@@ -222,14 +219,14 @@ public class TestCatalogSearchUi extends AbstractIntegrationTest {
   }
 
   @Test
-  public void testGuestCantCreateWorkspace() throws Exception {
+  public void testGuestCantCreateWorkspace() {
     Map<String, String> workspace = ImmutableMap.of("title", "my workspace");
     expect(asGuest().header("Origin", workspacesApi()).body(stringify(workspace)), 404)
         .post(workspacesApi());
   }
 
   @Test
-  public void testGuestCanCreateWorkspacesForOthers() throws Exception {
+  public void testGuestCanCreateWorkspacesForOthers() {
     Map<String, String> workspace =
         ImmutableMap.of("title", "my workspace", Core.METACARD_OWNER, "a@b.c");
     Response res =
@@ -242,7 +239,7 @@ public class TestCatalogSearchUi extends AbstractIntegrationTest {
   }
 
   @Test
-  public void testAdminCanCreateWorkspace() throws Exception {
+  public void testAdminCanCreateWorkspace() {
     Map<String, String> workspace = ImmutableMap.of("title", "my workspace");
     Response res =
         expect(asAdmin().header("Origin", workspacesApi()).body(stringify(workspace)), 201)
@@ -254,7 +251,7 @@ public class TestCatalogSearchUi extends AbstractIntegrationTest {
   }
 
   @Test
-  public void testGuestCantViewUnsharedWorkspace() throws Exception {
+  public void testGuestCantViewUnsharedWorkspace() {
     Map<String, Object> workspace = Collections.emptyMap();
     Response res =
         expect(asAdmin().header("Origin", workspacesApi()).body(stringify(workspace)), 201)
@@ -268,7 +265,7 @@ public class TestCatalogSearchUi extends AbstractIntegrationTest {
   }
 
   @Test
-  public void testCanShareByGroup() throws Exception {
+  public void testCanShareByGroup() {
     Map<String, Object> workspace =
         ImmutableMap.of(SecurityAttributes.ACCESS_GROUPS, ImmutableList.of("guest"));
 
@@ -284,7 +281,7 @@ public class TestCatalogSearchUi extends AbstractIntegrationTest {
   }
 
   @Test
-  public void testCanShareByEmail() throws Exception {
+  public void testCanShareByEmail() {
     Map<String, Object> workspace =
         ImmutableMap.of(
             SecurityAttributes.ACCESS_INDIVIDUALS, ImmutableList.of("random@localhost.local"));
@@ -303,7 +300,7 @@ public class TestCatalogSearchUi extends AbstractIntegrationTest {
   }
 
   @Test
-  public void testCanShareAndUnshare() throws Exception {
+  public void testCanShareAndUnshare() {
     Map<String, Object> workspace =
         ImmutableMap.of(SecurityAttributes.ACCESS_GROUPS, ImmutableList.of("guest"));
 
@@ -328,7 +325,7 @@ public class TestCatalogSearchUi extends AbstractIntegrationTest {
   }
 
   @Test
-  public void testWorkspaceSavedItems() throws Exception {
+  public void testWorkspaceSavedItems() {
     List<String> metacards = ImmutableList.of("item1", "item2");
     Map<String, Object> workspace = ImmutableMap.of(WORKSPACE_METACARDS, metacards);
 
@@ -343,7 +340,7 @@ public class TestCatalogSearchUi extends AbstractIntegrationTest {
   }
 
   @Test
-  public void testWorkspaceQueries() throws Exception {
+  public void testWorkspaceQueries() {
     List<Map<String, String>> queries =
         Arrays.asList(ImmutableMap.of("id", "queryId1"), ImmutableMap.of("id", "queryId2"));
     Map<String, Object> workspace = ImmutableMap.of(WORKSPACE_QUERIES, queries);
@@ -359,7 +356,7 @@ public class TestCatalogSearchUi extends AbstractIntegrationTest {
   }
 
   @Test
-  public void testQueriesWithSpecificSources() throws Exception {
+  public void testQueriesWithSpecificSources() {
     List<String> sources = ImmutableList.of("source a", "source b");
 
     Map<String, Object> query =
@@ -380,7 +377,7 @@ public class TestCatalogSearchUi extends AbstractIntegrationTest {
   }
 
   @Test
-  public void testCreateWorkspaceWithQueries() throws Exception {
+  public void testCreateWorkspaceWithQueries() {
     Map<String, Object> query = ImmutableMap.of("id", "queryId");
     Map<String, Object> workspace = ImmutableMap.of(WORKSPACE_QUERIES, ImmutableList.of(query));
 
@@ -397,7 +394,7 @@ public class TestCatalogSearchUi extends AbstractIntegrationTest {
   @SuppressWarnings("squid:S1607" /* Feature is off by default */)
   @Ignore
   @Test
-  public void testGetSystemTemplates() throws Exception {
+  public void testGetSystemTemplates() {
     Set<String> expectedQueryTemplateTitles =
         new HashSet<>(ImmutableSet.of("Contact Name", "Imagery Only"));
 
@@ -441,7 +438,7 @@ public class TestCatalogSearchUi extends AbstractIntegrationTest {
   }
 
   @Test
-  public void testGetMetacardTransformerDescriptors() throws Exception {
+  public void testGetMetacardTransformerDescriptors() {
     Response res =
         expect(asUser("random", "password").header("Origin", transformersApi()), 200)
             .get(transformersApi() + "/metacard");
@@ -457,7 +454,7 @@ public class TestCatalogSearchUi extends AbstractIntegrationTest {
   }
 
   @Test
-  public void testGetQueryResponseTransformerDescriptors() throws Exception {
+  public void testGetQueryResponseTransformerDescriptors() {
     Response res =
         expect(asUser("random", "password").header("Origin", transformersApi()), 200)
             .get(transformersApi() + "/query");
@@ -473,7 +470,7 @@ public class TestCatalogSearchUi extends AbstractIntegrationTest {
   }
 
   @Test
-  public void testGetMetacardTransformerDescriptorById() throws Exception {
+  public void testGetMetacardTransformerDescriptorById() {
     Response res =
         expect(asUser("random", "password").header("Origin", transformersApi()), 200)
             .get(transformersApi() + "/metacard/html");
@@ -484,7 +481,7 @@ public class TestCatalogSearchUi extends AbstractIntegrationTest {
   }
 
   @Test
-  public void testGetQueryResponseTransformerDescriptorById() throws Exception {
+  public void testGetQueryResponseTransformerDescriptorById() {
     Response res =
         expect(asUser("random", "password").header("Origin", transformersApi()), 200)
             .get(transformersApi() + "/query/atom");
@@ -495,7 +492,7 @@ public class TestCatalogSearchUi extends AbstractIntegrationTest {
   }
 
   @Test
-  public void testGetMetacardTransformerDescriptorNotFound() throws Exception {
+  public void testGetMetacardTransformerDescriptorNotFound() {
     Response res =
         expect(asUser("random", "password").header("Origin", transformersApi()), 404)
             .get(transformersApi() + "/metacard/foo");
@@ -506,7 +503,7 @@ public class TestCatalogSearchUi extends AbstractIntegrationTest {
   }
 
   @Test
-  public void testGetQueryResponseTransformerDescriptorNotFound() throws Exception {
+  public void testGetQueryResponseTransformerDescriptorNotFound() {
     Response res =
         expect(asUser("random", "password").header("Origin", transformersApi()), 404)
             .get(transformersApi() + "/query/bar");
@@ -517,7 +514,7 @@ public class TestCatalogSearchUi extends AbstractIntegrationTest {
   }
 
   @Test
-  public void testGetTransformerDescriptorTypeNotFound() throws Exception {
+  public void testGetTransformerDescriptorTypeNotFound() {
     Response res =
         expect(asUser("random", "password").header("Origin", transformersApi()), 404)
             .get(transformersApi() + "/foo/bar");

@@ -35,8 +35,9 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import org.apache.cxf.ws.security.tokenstore.SecurityToken;
 import org.apache.shiro.subject.PrincipalCollection;
-import org.codice.ddf.security.handler.api.BaseAuthenticationToken;
-import org.codice.ddf.security.handler.api.BaseAuthenticationTokenFactory;
+import org.codice.ddf.security.handler.api.UPAuthenticationToken;
+import org.codice.ddf.security.policy.context.ContextPolicy;
+import org.codice.ddf.security.policy.context.ContextPolicyManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
@@ -46,9 +47,13 @@ public class AuthenticationServiceImplTest {
 
   private static final String PATH = "/path";
 
+  private static final String REALM = "test";
+
   private static final String USER_NAME = "test";
 
   private static final String PASSWORD = "test";
+
+  private ContextPolicyManager policyManager;
 
   private SecurityManager securityManager;
 
@@ -62,9 +67,11 @@ public class AuthenticationServiceImplTest {
         .thenReturn(mock(SecurityTokenHolder.class));
     when(sessionFactory.getOrCreateSession(any())).thenReturn(session);
 
+    policyManager = mock(ContextPolicyManager.class);
     securityManager = mock(SecurityManager.class);
 
-    authenticationService = new AuthenticationServiceImpl(securityManager, sessionFactory);
+    authenticationService =
+        new AuthenticationServiceImpl(policyManager, securityManager, sessionFactory);
 
     UriInfo uriInfo = mock(UriInfo.class);
     UriBuilder uriBuilder = mock(UriBuilder.class);
@@ -72,7 +79,7 @@ public class AuthenticationServiceImplTest {
     when(uriBuilder.replacePath(anyString())).thenReturn(uriBuilder);
     when(uriBuilder.build()).thenReturn(new URI(URL));
 
-    mockUser(USER_NAME, PASSWORD);
+    mockUser(USER_NAME, PASSWORD, REALM);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -86,19 +93,55 @@ public class AuthenticationServiceImplTest {
     HttpServletRequest request = mock(HttpServletRequest.class);
     when(request.isSecure()).thenReturn(true);
 
+    ContextPolicy policy = mock(ContextPolicy.class);
+    when(policy.getRealm()).thenReturn(REALM);
+    when(policyManager.getContextPolicy(PATH)).thenReturn(policy);
+
     authenticationService.login(request, "bad", "bad", PATH);
   }
 
   @Test
-  public void testDefault() throws SecurityServiceException {
+  public void testDefaultRealm() throws SecurityServiceException {
     HttpServletRequest request = mock(HttpServletRequest.class);
     when(request.isSecure()).thenReturn(true);
 
-    mockUser(USER_NAME, PASSWORD);
+    mockUser(USER_NAME, PASSWORD, "karaf");
     authenticationService.login(request, USER_NAME, PASSWORD, PATH);
   }
 
-  private void mockUser(String username, String password) throws SecurityServiceException {
+  @Test
+  public void testSingleRealm() throws SecurityServiceException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.isSecure()).thenReturn(true);
+
+    ContextPolicy policy = mock(ContextPolicy.class);
+    when(policy.getRealm()).thenReturn(REALM);
+    when(policyManager.getContextPolicy(PATH)).thenReturn(policy);
+
+    authenticationService.login(request, USER_NAME, PASSWORD, PATH);
+  }
+
+  @Test
+  public void testMultiRealm() throws SecurityServiceException {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.isSecure()).thenReturn(true);
+
+    ContextPolicy policy = mock(ContextPolicy.class);
+    ContextPolicy anotherPolicy = mock(ContextPolicy.class);
+
+    when(policy.getRealm()).thenReturn(REALM);
+    when(anotherPolicy.getRealm()).thenReturn("ANOTHER_REALM");
+    when(policyManager.getContextPolicy(PATH)).thenReturn(policy);
+    when(policyManager.getContextPolicy("/anotherPath")).thenReturn(anotherPolicy);
+
+    mockUser("another", "another", "ANOTHER_REALM");
+
+    authenticationService.login(request, USER_NAME, PASSWORD, PATH);
+    authenticationService.login(request, "another", "another", "/anotherPath");
+  }
+
+  private void mockUser(String username, String password, String realm)
+      throws SecurityServiceException {
     Subject subject = mock(Subject.class);
     SecurityAssertion securityAssertion = mock(SecurityAssertion.class);
     SecurityToken securityToken = mock(SecurityToken.class);
@@ -112,25 +155,26 @@ public class AuthenticationServiceImplTest {
 
     when(subject.getPrincipals()).thenReturn(collection);
 
-    BaseAuthenticationToken token =
-        new BaseAuthenticationTokenFactory().fromUsernamePassword(username, password);
+    UPAuthenticationToken token = new UPAuthenticationToken(username, password, realm);
     when(securityManager.getSubject(argThat(new UsernamePasswordTokenMatcher(token))))
         .thenReturn(subject);
   }
 
-  private class UsernamePasswordTokenMatcher extends ArgumentMatcher<BaseAuthenticationToken> {
+  private class UsernamePasswordTokenMatcher extends ArgumentMatcher<UPAuthenticationToken> {
 
-    private BaseAuthenticationToken left;
+    private UPAuthenticationToken left;
 
-    UsernamePasswordTokenMatcher(BaseAuthenticationToken token) {
+    UsernamePasswordTokenMatcher(UPAuthenticationToken token) {
       this.left = token;
     }
 
     @Override
     public boolean matches(Object object) {
-      if (object instanceof BaseAuthenticationToken) {
-        BaseAuthenticationToken right = (BaseAuthenticationToken) object;
-        return left.getCredentialsAsXMLString().equals(right.getCredentialsAsXMLString());
+      if (object instanceof UPAuthenticationToken) {
+        UPAuthenticationToken right = (UPAuthenticationToken) object;
+        return left.getUsername().equals(right.getUsername())
+            && left.getPassword().equals(right.getPassword())
+            && left.getRealm().equals(right.getRealm());
       }
 
       return false;

@@ -52,8 +52,10 @@ import org.apache.karaf.jaas.boot.principal.RolePrincipal;
 import org.apache.shiro.UnavailableSecurityManagerException;
 import org.apache.shiro.subject.ExecutionException;
 import org.codice.ddf.security.handler.api.BaseAuthenticationToken;
-import org.codice.ddf.security.handler.api.BaseAuthenticationTokenFactory;
 import org.codice.ddf.security.handler.api.GuestAuthenticationToken;
+import org.codice.ddf.security.handler.api.PKIAuthenticationToken;
+import org.codice.ddf.security.handler.api.PKIAuthenticationTokenFactory;
+import org.codice.ddf.security.handler.api.UPAuthenticationToken;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -102,8 +104,7 @@ public class Security {
    * @return {@link Subject} associated with the user name and password provided
    */
   public Subject getSubject(String username, String password) {
-    BaseAuthenticationTokenFactory tokenFactory = createBasicTokenFactory();
-    BaseAuthenticationToken token = tokenFactory.fromUsernamePassword(username, password);
+    UPAuthenticationToken token = new UPAuthenticationToken(username, password);
     SecurityManager securityManager = getSecurityManager();
 
     if (securityManager != null) {
@@ -234,14 +235,15 @@ public class Security {
       return null;
     }
 
-    BaseAuthenticationTokenFactory tokenFactory = createBasicTokenFactory();
-    BaseAuthenticationToken token =
-        tokenFactory.fromCertificates(new X509Certificate[] {(X509Certificate) cert});
-    if (token != null) {
+    PKIAuthenticationTokenFactory pkiTokenFactory = createPKITokenFactory();
+    PKIAuthenticationToken pkiToken =
+        pkiTokenFactory.getTokenFromCerts(
+            new X509Certificate[] {(X509Certificate) cert}, PKIAuthenticationToken.DEFAULT_REALM);
+    if (pkiToken != null) {
       SecurityManager securityManager = getSecurityManager();
       if (securityManager != null) {
         try {
-          cachedSystemSubject = securityManager.getSubject(token);
+          cachedSystemSubject = securityManager.getSubject(pkiToken);
         } catch (SecurityServiceException sse) {
           LOGGER.warn("Unable to request subject for system user.", sse);
         }
@@ -258,7 +260,8 @@ public class Security {
    */
   public Subject getGuestSubject(String ipAddress) {
     Subject subject = null;
-    GuestAuthenticationToken token = new GuestAuthenticationToken(ipAddress);
+    GuestAuthenticationToken token =
+        new GuestAuthenticationToken(BaseAuthenticationToken.DEFAULT_REALM, ipAddress);
     LOGGER.debug("Getting new Guest user token for {}", ipAddress);
     try {
       SecurityManager securityManager = getSecurityManager();
@@ -377,10 +380,10 @@ public class Security {
     SecurityLogger.auditWarn("Elevating current user permissions to use System subject");
   }
 
-  private BaseAuthenticationTokenFactory createBasicTokenFactory() {
-    BaseAuthenticationTokenFactory tokenFactory = new BaseAuthenticationTokenFactory();
-    tokenFactory.init();
-    return tokenFactory;
+  private PKIAuthenticationTokenFactory createPKITokenFactory() {
+    PKIAuthenticationTokenFactory pkiTokenFactory = new PKIAuthenticationTokenFactory();
+    pkiTokenFactory.init();
+    return pkiTokenFactory;
   }
 
   private String getCertificateAlias() {

@@ -31,14 +31,15 @@ public class SAMLAuthenticationToken extends BaseAuthenticationToken {
    *
    * @param principal represents the
    * @param token
+   * @param realm
    */
-  public SAMLAuthenticationToken(Principal principal, SecurityToken token) {
-    super(principal, token);
+  public SAMLAuthenticationToken(Principal principal, SecurityToken token, String realm) {
+    super(principal, realm, token);
     reference = false;
   }
 
-  public SAMLAuthenticationToken(Principal principal, String samlRef) {
-    super(principal, samlRef);
+  public SAMLAuthenticationToken(Principal principal, String samlRef, String realm) {
+    super(principal, realm, samlRef);
     reference = true;
   }
 

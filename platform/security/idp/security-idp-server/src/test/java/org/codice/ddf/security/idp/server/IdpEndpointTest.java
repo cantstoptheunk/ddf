@@ -64,7 +64,8 @@ import org.apache.wss4j.common.ext.WSSecurityException;
 import org.codice.ddf.itests.common.XmlSearch;
 import org.codice.ddf.security.OcspService;
 import org.codice.ddf.security.common.jaxrs.RestSecurity;
-import org.codice.ddf.security.handler.api.BaseAuthenticationTokenFactory;
+import org.codice.ddf.security.handler.api.PKIAuthenticationTokenFactory;
+import org.codice.ddf.security.policy.context.ContextPolicy;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -244,11 +245,11 @@ public class IdpEndpointTest {
     idpEndpoint.setSpMetadata(Collections.singletonList(spMetadata));
     idpEndpoint.setSecurityManager(securityManager);
     idpEndpoint.setLogoutStates(new RelayStates<>());
-    BaseAuthenticationTokenFactory baseAuthenticationTokenFactory =
-        new BaseAuthenticationTokenFactory();
-    baseAuthenticationTokenFactory.setSignaturePropertiesPath(signatureFile.getAbsolutePath());
-    baseAuthenticationTokenFactory.init();
-    idpEndpoint.setTokenFactory(baseAuthenticationTokenFactory);
+    PKIAuthenticationTokenFactory pkiAuthenticationTokenFactory =
+        new PKIAuthenticationTokenFactory();
+    pkiAuthenticationTokenFactory.setSignaturePropertiesPath(signatureFile.getAbsolutePath());
+    pkiAuthenticationTokenFactory.init();
+    idpEndpoint.setTokenFactory(pkiAuthenticationTokenFactory);
     OcspService ocspService = mock(OcspService.class);
     idpEndpoint.setOcspService(ocspService);
     idpEndpoint.cookieCache.cacheSamlAssertion("1", readDocument("/saml.xml").getDocumentElement());
@@ -414,6 +415,7 @@ public class IdpEndpointTest {
 
     when(request.isSecure()).thenReturn(true);
     when(request.getRequestURL()).thenReturn(requestURL);
+    when(request.getAttribute(ContextPolicy.ACTIVE_REALM)).thenReturn("*");
     // admin:admin
     when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Basic YWRtaW46YWRtaW4=");
 
@@ -438,6 +440,7 @@ public class IdpEndpointTest {
     HttpServletRequest request = mock(HttpServletRequest.class);
 
     when(request.getRequestURL()).thenReturn(new StringBuffer("https://www.example.com"));
+    when(request.getAttribute(ContextPolicy.ACTIVE_REALM)).thenReturn("*");
     // admin:admin
     when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn("Basic YWRtaW46YWRtaW4=");
 
@@ -462,6 +465,7 @@ public class IdpEndpointTest {
 
     when(request.isSecure()).thenReturn(true);
     when(request.getRequestURL()).thenReturn(requestURL);
+    when(request.getAttribute(ContextPolicy.ACTIVE_REALM)).thenReturn("*");
     // dummy cert
     when((X509Certificate[]) request.getAttribute(requestCertificateAttributeName))
         .thenReturn(new X509Certificate[] {x509Certificate});
@@ -491,6 +495,7 @@ public class IdpEndpointTest {
 
     when(request.isSecure()).thenReturn(true);
     when(request.getRequestURL()).thenReturn(requestURL);
+    when(request.getAttribute(ContextPolicy.ACTIVE_REALM)).thenReturn("*");
     // dummy cert
     when((X509Certificate[]) request.getAttribute(requestCertificateAttributeName))
         .thenReturn(new X509Certificate[] {x509Certificate});
@@ -512,6 +517,7 @@ public class IdpEndpointTest {
 
     when(request.isSecure()).thenReturn(true);
     when(request.getRequestURL()).thenReturn(requestURL);
+    when(request.getAttribute(ContextPolicy.ACTIVE_REALM)).thenReturn("*");
 
     Response response =
         idpEndpoint.processLogin(
@@ -537,6 +543,7 @@ public class IdpEndpointTest {
 
     when(request.isSecure()).thenReturn(true);
     when(request.getRequestURL()).thenReturn(requestURL);
+    when(request.getAttribute(ContextPolicy.ACTIVE_REALM)).thenReturn("*");
     when(request.getCookies()).thenReturn(new Cookie[] {cookie});
     when(cookie.getName()).thenReturn(IdpEndpoint.COOKIE);
     when(cookie.getValue()).thenReturn("1");
@@ -558,6 +565,7 @@ public class IdpEndpointTest {
 
     when(request.isSecure()).thenReturn(true);
     when(request.getRequestURL()).thenReturn(requestURL);
+    when(request.getAttribute(ContextPolicy.ACTIVE_REALM)).thenReturn("*");
     when(request.getCookies()).thenReturn(new Cookie[] {cookie});
     when(cookie.getName()).thenReturn(IdpEndpoint.COOKIE);
     when(cookie.getValue()).thenReturn("2");
@@ -594,6 +602,7 @@ public class IdpEndpointTest {
 
     when(request.isSecure()).thenReturn(true);
     when(request.getRequestURL()).thenReturn(requestURL);
+    when(request.getAttribute(ContextPolicy.ACTIVE_REALM)).thenReturn("*");
     when(request.getCookies()).thenReturn(new Cookie[] {cookie});
     when(cookie.getName()).thenReturn(IdpEndpoint.COOKIE);
     when(cookie.getValue()).thenReturn("2");
@@ -618,6 +627,7 @@ public class IdpEndpointTest {
 
     when(request.isSecure()).thenReturn(true);
     when(request.getRequestURL()).thenReturn(requestURL);
+    when(request.getAttribute(ContextPolicy.ACTIVE_REALM)).thenReturn("*");
 
     Response response =
         idpEndpoint.processLogin(
@@ -644,6 +654,7 @@ public class IdpEndpointTest {
 
     when(request.isSecure()).thenReturn(true);
     when(request.getRequestURL()).thenReturn(requestURL);
+    when(request.getAttribute(ContextPolicy.ACTIVE_REALM)).thenReturn("*");
     when(request.getCookies()).thenReturn(new Cookie[] {cookie});
     when(cookie.getName()).thenReturn(IdpEndpoint.COOKIE);
     when(cookie.getValue()).thenReturn("2");
@@ -669,6 +680,7 @@ public class IdpEndpointTest {
 
     when(request.isSecure()).thenReturn(true);
     when(request.getRequestURL()).thenReturn(requestURL);
+    when(request.getAttribute(ContextPolicy.ACTIVE_REALM)).thenReturn("*");
     when(request.getCookies()).thenReturn(new Cookie[] {cookie});
     when(cookie.getName()).thenReturn(IdpEndpoint.COOKIE);
     when(cookie.getValue()).thenReturn("1");
@@ -690,6 +702,7 @@ public class IdpEndpointTest {
 
     when(request.isSecure()).thenReturn(true);
     when(request.getRequestURL()).thenReturn(requestURL);
+    when(request.getAttribute(ContextPolicy.ACTIVE_REALM)).thenReturn("*");
     // dummy cert
     when((X509Certificate[]) request.getAttribute(requestCertificateAttributeName))
         .thenReturn(new X509Certificate[] {x509Certificate});
@@ -714,6 +727,7 @@ public class IdpEndpointTest {
 
     when(request.isSecure()).thenReturn(true);
     when(request.getRequestURL()).thenReturn(requestURL);
+    when(request.getAttribute(ContextPolicy.ACTIVE_REALM)).thenReturn("*");
     // dummy cert
     when((X509Certificate[]) request.getAttribute(requestCertificateAttributeName))
         .thenReturn(new X509Certificate[] {x509Certificate});
@@ -739,6 +753,7 @@ public class IdpEndpointTest {
 
     when(request.isSecure()).thenReturn(true);
     when(request.getRequestURL()).thenReturn(requestURL);
+    when(request.getAttribute(ContextPolicy.ACTIVE_REALM)).thenReturn("*");
     // dummy cert
     when((X509Certificate[]) request.getAttribute(requestCertificateAttributeName))
         .thenReturn(new X509Certificate[] {x509Certificate});
@@ -769,6 +784,7 @@ public class IdpEndpointTest {
 
     when(request.isSecure()).thenReturn(true);
     when(request.getRequestURL()).thenReturn(requestURL);
+    when(request.getAttribute(ContextPolicy.ACTIVE_REALM)).thenReturn("*");
     // dummy cert
     when((X509Certificate[]) request.getAttribute(requestCertificateAttributeName))
         .thenReturn(new X509Certificate[] {x509Certificate});
@@ -802,6 +818,7 @@ public class IdpEndpointTest {
 
     when(request.isSecure()).thenReturn(true);
     when(request.getRequestURL()).thenReturn(requestURL);
+    when(request.getAttribute(ContextPolicy.ACTIVE_REALM)).thenReturn("*");
     // dummy cert
     when((X509Certificate[]) request.getAttribute(requestCertificateAttributeName))
         .thenReturn(new X509Certificate[] {x509Certificate});
@@ -839,6 +856,7 @@ public class IdpEndpointTest {
 
     when(request.isSecure()).thenReturn(true);
     when(request.getRequestURL()).thenReturn(requestURL);
+    when(request.getAttribute(ContextPolicy.ACTIVE_REALM)).thenReturn("*");
     // dummy cert
     when((X509Certificate[]) request.getAttribute(requestCertificateAttributeName))
         .thenReturn(new X509Certificate[] {x509Certificate});
@@ -877,6 +895,7 @@ public class IdpEndpointTest {
 
     when(request.isSecure()).thenReturn(true);
     when(request.getRequestURL()).thenReturn(requestURL);
+    when(request.getAttribute(ContextPolicy.ACTIVE_REALM)).thenReturn("*");
     // dummy cert
     when((X509Certificate[]) request.getAttribute(requestCertificateAttributeName))
         .thenReturn(new X509Certificate[] {x509Certificate});
@@ -900,6 +919,7 @@ public class IdpEndpointTest {
 
     when(request.isSecure()).thenReturn(true);
     when(request.getRequestURL()).thenReturn(requestURL);
+    when(request.getAttribute(ContextPolicy.ACTIVE_REALM)).thenReturn("*");
 
     Response response =
         idpEndpoint.processLogin(

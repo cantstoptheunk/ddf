@@ -39,6 +39,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -86,6 +87,7 @@ import org.w3c.dom.Element;
 @Path("logout")
 public class LogoutRequestService {
 
+  public static final String IDP_REALM_NAME = "idp";
   public static final String NO_SUPPORT_FOR_POST_OR_REDIRECT_BINDINGS =
       "The identity provider does not support either POST or Redirect bindings.";
   public static final String ROOT_NODE_NAME = "root";
@@ -265,7 +267,9 @@ public class LogoutRequestService {
     return Stream.of(sessionAttributes.get(SecurityConstants.SAML_ASSERTION))
         .filter(SecurityTokenHolder.class::isInstance)
         .map(SecurityTokenHolder.class::cast)
-        .map(SecurityTokenHolder::getSecurityToken)
+        .map(SecurityTokenHolder::getRealmTokenMap)
+        .map(Map::values)
+        .flatMap(Collection::stream)
         .map(this::extractSubject)
         .filter(Objects::nonNull)
         .map(SubjectUtils::getName)
@@ -513,12 +517,12 @@ public class LogoutRequestService {
   }
 
   private SecurityToken getIdpSecurityToken() {
-    return getTokenHolder().getSecurityToken();
+    return getTokenHolder().getSecurityToken(IDP_REALM_NAME);
   }
 
   private void logout() {
     logSecurityAuditRole();
-    getTokenHolder().remove();
+    getTokenHolder().remove(IDP_REALM_NAME);
   }
 
   private void logSecurityAuditRole() {

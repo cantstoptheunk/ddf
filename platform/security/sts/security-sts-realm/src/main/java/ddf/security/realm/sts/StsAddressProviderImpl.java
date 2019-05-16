@@ -23,15 +23,34 @@ import org.slf4j.LoggerFactory;
 public class StsAddressProviderImpl implements StsAddressProvider {
   private static final Logger LOGGER = LoggerFactory.getLogger(StsAddressProviderImpl.class);
 
+  private boolean useWss = false;
+
   private final STSClientConfiguration internalSts;
 
-  public StsAddressProviderImpl(STSClientConfiguration internalSts) {
+  private final STSClientConfiguration wssSts;
+
+  public StsAddressProviderImpl(STSClientConfiguration internalSts, STSClientConfiguration wssSts) {
     this.internalSts = internalSts;
+    this.wssSts = wssSts;
+  }
+
+  public boolean isUseWss() {
+    return useWss;
+  }
+
+  public void setUseWss(boolean useWss) {
+    this.useWss = useWss;
   }
 
   @Override
   public String getWsdlAddress() {
-    return internalSts.getAddress();
+    String currentStsAddress;
+    if (useWss) {
+      currentStsAddress = wssSts.getAddress();
+    } else {
+      currentStsAddress = internalSts.getAddress();
+    }
+    return currentStsAddress;
   }
 
   @Override

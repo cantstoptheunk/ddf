@@ -42,8 +42,6 @@ import org.slf4j.LoggerFactory;
 public class LocalLogoutServlet extends HttpServlet {
   private static final Logger LOGGER = LoggerFactory.getLogger(LocalLogoutServlet.class);
 
-  private String redirectUri;
-
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws ServletException {
@@ -55,10 +53,12 @@ public class LocalLogoutServlet extends HttpServlet {
     List<NameValuePair> params = new ArrayList<>();
 
     try {
-      redirectUrlBuilder = new URIBuilder(redirectUri);
+      redirectUrlBuilder = new URIBuilder("/logout/logout-response.html");
 
       if (Strings.isNotBlank(SystemBaseUrl.EXTERNAL.getRootContext())) {
-        redirectUrlBuilder = new URIBuilder(SystemBaseUrl.EXTERNAL.getRootContext() + redirectUri);
+        redirectUrlBuilder =
+            new URIBuilder(
+                SystemBaseUrl.EXTERNAL.getRootContext() + "/logout/logout-response.html");
       }
 
       invalidateSession(request, response);
@@ -113,7 +113,7 @@ public class LocalLogoutServlet extends HttpServlet {
             SecurityLogger.audit("Subject with admin privileges has logged out", subject);
           }
         }
-        savedToken.remove();
+        savedToken.removeAll();
       }
       session.invalidate();
       deleteJSessionId(response);
@@ -127,9 +127,5 @@ public class LocalLogoutServlet extends HttpServlet {
     cookie.setPath("/");
     cookie.setComment("EXPIRING COOKIE at " + System.currentTimeMillis());
     response.addCookie(cookie);
-  }
-
-  public void setRedirectUri(String redirectUri) {
-    this.redirectUri = redirectUri;
   }
 }
