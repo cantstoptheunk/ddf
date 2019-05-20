@@ -64,20 +64,28 @@ class ResultItems extends React.Component<Props, State> {
       expandSearchFieldText: false,
     }
   }
-  
+
   createShowResultText(solrQuery: any[]) {
     let showingResultsFor = 'Showing Results for '
     if (solrQuery !== undefined && solrQuery !== null) {
-      if (!this.state.expandSearchFieldText) {
-        const copyQuery = [...solrQuery]
-        copyQuery.splice(copyQuery.length - SHOW_MORE_LENGTH)
-        showingResultsFor += copyQuery.join(', ')
+      if (!this.state.expandSearchFieldText && solrQuery.length > 2) {
+        showingResultsFor += this.createCondensedResultsForText(solrQuery)
         return showingResultsFor
       }
 
-      showingResultsFor += solrQuery.join(', ')
+      showingResultsFor += this.createExpandedResultsForText(solrQuery)
       return showingResultsFor
     }
+  }
+
+  createCondensedResultsForText(solrQuery: any[]) {
+    const copyQuery = [...solrQuery]
+    copyQuery.splice(0, copyQuery.length - SHOW_MORE_LENGTH)
+    return copyQuery.join(', ')
+  }
+
+  createExpandedResultsForText(solrQuery: any[]) {
+    return solrQuery.join(', ')
   }
 
   render() {
