@@ -363,19 +363,39 @@ public class MetacardApplication implements SparkApplication {
             res.status(204);
             return "[]";
           }
-          List<HistoryResponse> response =
-              queryResponse
-                  .stream()
-                  .map(Result::getMetacard)
-                  .map(
-                      mc ->
-                          new HistoryResponse(
-                              mc.getId(),
-                              (String) mc.getAttribute(MetacardVersion.EDITED_BY).getValue(),
-                              (Date) mc.getAttribute(MetacardVersion.VERSIONED_ON).getValue()))
-                  .sorted(Comparator.comparing(HistoryResponse::getVersioned))
-                  .collect(Collectors.toList());
-          return util.getJson(response);
+
+          List<HistoryResponse> historyResponse = new ArrayList<>();
+          for (Result result : queryResponse) {
+            Metacard metacard = result.getMetacard();
+            String originalId = metacard.getId();
+            String title = metacard.getTitle();
+            String editedBy = (String) metacard.getAttribute(MetacardVersion.EDITED_BY).getValue();
+            Date versionDate =
+                (Date) metacard.getAttribute(MetacardVersion.VERSIONED_ON).getValue();
+            String date = metacard.getCreatedDate().toString();
+
+            historyResponse.add(
+                new HistoryResponse(originalId, originalId, title, date, editedBy, versionDate));
+          }
+          return util.getJson(historyResponse);
+          //
+          //          List<HistoryResponse> response =
+          //              queryResponse
+          //                  .stream()
+          //                  .map(Result::getMetacard)
+          //                  .map(
+          //                      mc ->
+          //                          new HistoryResponse(
+          //                              mc.getId(),
+          //                              mc.getId(),
+          //                              mc.getTitle(),
+          //                              mc.getCreatedDate().toString(),
+          //                              (String)
+          // mc.getAttribute(MetacardVersion.EDITED_BY).getValue(),
+          //                              (Date)
+          // mc.getAttribute(MetacardVersion.VERSIONED_ON).getValue()))
+          //                  .collect(Collectors.toList());
+          //          return util.getJson(response);
         });
 
     get(

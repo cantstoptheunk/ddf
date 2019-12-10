@@ -19,18 +19,26 @@ import java.util.Date;
 public class HistoryResponse {
   private Instant versioned;
 
-  private String id;
-
-  private String editedBy;
+  private String originalId, versionId, editedBy, title, created;
 
   public HistoryResponse(String historyId, String editedBy, Instant versioned) {
-    this.id = historyId;
+    this.versionId = historyId;
     this.editedBy = editedBy;
     this.versioned = versioned;
   }
 
   public HistoryResponse(String historyId, String editedBy, Date versioned) {
     this(historyId, editedBy, versioned.toInstant());
+  }
+
+  public HistoryResponse(
+      String historyId, String editedBy, String id, String title, String created, Date versioned) {
+    this.versionId = historyId;
+    this.editedBy = editedBy;
+    this.versioned = versioned.toInstant();
+    this.originalId = id;
+    this.title = title;
+    this.created = created;
   }
 
   public Instant getVersioned() {
@@ -41,12 +49,12 @@ public class HistoryResponse {
     this.versioned = versioned;
   }
 
-  public String getId() {
-    return id;
+  public String getVersionId() {
+    return versionId;
   }
 
-  public void setId(String id) {
-    this.id = id;
+  public void setVersionId(String id) {
+    this.versionId = id;
   }
 
   public String getEditedBy() {
@@ -55,5 +63,29 @@ public class HistoryResponse {
 
   public void setEditedBy(String editedBy) {
     this.editedBy = editedBy;
+  }
+
+  public String getOriginalId() {
+    return originalId;
+  }
+
+  public void setOriginalId(String id) {
+    this.originalId = id;
+  }
+
+  public String getTitle() {
+    return title;
+  }
+
+  public void setTitle(String title) {
+    this.title = title;
+  }
+
+  public String getCreated() {
+    return created;
+  }
+
+  public void setCreated(String created) {
+    this.created = created;
   }
 }
