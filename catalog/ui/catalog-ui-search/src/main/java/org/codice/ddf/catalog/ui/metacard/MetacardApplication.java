@@ -371,7 +371,7 @@ public class MetacardApplication implements SparkApplication {
                   .map(
                       mc ->
                           new HistoryResponse(
-                              mc.getId(),
+                              id,
                               mc.getId(),
                               mc.getTitle(),
                               mc.getCreatedDate().toString(),

@@ -19,7 +19,7 @@ import java.util.Date;
 public class HistoryResponse {
   private Instant versioned;
 
-  private String originalId, versionId, editedBy, title, created;
+  private String resourceId, versionId, editedBy, title, created;
 
   public HistoryResponse(String historyId, String editedBy, Instant versioned) {
     this.versionId = historyId;
@@ -32,11 +32,11 @@ public class HistoryResponse {
   }
 
   public HistoryResponse(
-      String historyId, String editedBy, String id, String title, String created, Date versioned) {
+      String id, String historyId, String title, String created, String editedBy, Date versioned) {
     this.versionId = historyId;
     this.editedBy = editedBy;
     this.versioned = versioned.toInstant();
-    this.originalId = id;
+    this.resourceId = id;
     this.title = title;
     this.created = created;
   }
@@ -65,12 +65,12 @@ public class HistoryResponse {
     this.editedBy = editedBy;
   }
 
-  public String getOriginalId() {
-    return originalId;
+  public String getResourceId() {
+    return resourceId;
   }
 
-  public void setOriginalId(String id) {
-    this.originalId = id;
+  public void setResourceId(String id) {
+    this.resourceId = id;
   }
 
   public String getTitle() {
