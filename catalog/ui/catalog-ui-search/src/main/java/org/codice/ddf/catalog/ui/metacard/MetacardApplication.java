@@ -364,39 +364,23 @@ public class MetacardApplication implements SparkApplication {
             return "[]";
           }
 
-          List<HistoryResponse> history = new ArrayList<>();
-          for (Result response : queryResponse) {
+          List<Metacard> metacards =
+              queryResponse.stream().map(Result::getMetacard).collect(Collectors.toList());
 
-            Metacard mcHistory = response.getMetacard();
-            history.add(
+          List<HistoryResponse> historyResponses = new ArrayList<>();
+
+          for (Metacard metacard : metacards) {
+            Map<String, List<Serializable>> metacardAttributes =
+                getHistoryMetacardAttributes(metacard);
+            historyResponses.add(
                 new HistoryResponse(
-                    id,
-                    mcHistory.getId(),
-                    mcHistory.getTitle(),
-                    mcHistory.getCreatedDate().toString(),
-                    mcHistory.getAttribute("cql").getValue().toString(),
-                    (String) mcHistory.getAttribute(MetacardVersion.EDITED_BY).getValue(),
-                    (Date) mcHistory.getAttribute(MetacardVersion.VERSIONED_ON).getValue()));
+                    metacard.getId(),
+                    (String) metacard.getAttribute(MetacardVersion.EDITED_BY).getValue(),
+                    (Date) metacard.getAttribute(MetacardVersion.VERSIONED_ON).getValue(),
+                    metacardAttributes));
           }
-          return util.getJson(history);
 
-          //          List<HistoryResponse> response =
-          //              queryResponse
-          //                  .stream()git diff
-          //                  .map(Result::getMetacard)
-          //                  .map(
-          //                      mc ->
-          //                          new HistoryResponse(
-          //                              id,
-          //                              mc.getId(),
-          //                              mc.getTitle(),
-          //                              mc.getCreatedDate().toString(),
-          //                              (String)
-          // mc.getAttribute(MetacardVersion.EDITED_BY).getValue(),
-          //                              (Date)
-          // mc.getAttribute(MetacardVersion.VERSIONED_ON).getValue()))
-          //                  .collect(Collectors.toList());
-          //          return util.getJson(response);
+          return util.getJson(historyResponses);
         });
 
     get(
@@ -912,6 +896,26 @@ public class MetacardApplication implements SparkApplication {
     exception(IOException.class, util::handleIOException);
 
     exception(RuntimeException.class, util::handleRuntimeException);
+  }
+
+  private Map<String, List<Serializable>> getHistoryMetacardAttributes(Metacard metacard) {
+    Set<AttributeDescriptor> attributeDescriptors =
+        metacard.getMetacardType().getAttributeDescriptors();
+
+    Map<String, List<Serializable>> historyMetacardAttributes = new HashMap<>();
+    for (AttributeDescriptor attDesc : attributeDescriptors) {
+      String name = attDesc.getName();
+      Attribute attribute = metacard.getAttribute(name);
+
+      if (attribute != null) {
+        List<Serializable> values = metacard.getAttribute(name).getValues();
+        if (values != null) {
+          historyMetacardAttributes.put(name, values);
+        }
+      }
+    }
+
+    return historyMetacardAttributes;
   }
 
   private Set<String> getHiddenFields(List<Result> metacards) {

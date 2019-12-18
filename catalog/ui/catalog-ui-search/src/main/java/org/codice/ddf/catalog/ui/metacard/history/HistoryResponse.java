@@ -13,39 +13,38 @@
  */
 package org.codice.ddf.catalog.ui.metacard.history;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 public class HistoryResponse {
   private Instant versioned;
 
-  private String resourceId, versionId, editedBy, title, created, cql;
+  private Map<String, List<Serializable>> historyMetacardAttributes;
 
-  public HistoryResponse(String historyId, String editedBy, Instant versioned) {
-    this.versionId = historyId;
+  private String versionId, editedBy;
+
+  public HistoryResponse(String versionId, String editedBy, Instant versioned) {
+    this.versionId = versionId;
     this.editedBy = editedBy;
     this.versioned = versioned;
   }
 
-  public HistoryResponse(String historyId, String editedBy, Date versioned) {
-    this(historyId, editedBy, versioned.toInstant());
-  }
-
   public HistoryResponse(
-      String id,
-      String historyId,
-      String title,
-      String created,
-      String cql,
+      String versionId,
       String editedBy,
-      Date versioned) {
-    this.versionId = historyId;
+      Date versioned,
+      Map<String, List<Serializable>> historyMetacardAttributes) {
+    this.versionId = versionId;
     this.editedBy = editedBy;
     this.versioned = versioned.toInstant();
-    this.resourceId = id;
-    this.title = title;
-    this.created = created;
-    this.cql = cql;
+    this.historyMetacardAttributes = historyMetacardAttributes;
+  }
+
+  public HistoryResponse(String historyId, String editedBy, Date versioned) {
+    this(historyId, editedBy, versioned.toInstant());
   }
 
   public Instant getVersioned() {
@@ -72,35 +71,11 @@ public class HistoryResponse {
     this.editedBy = editedBy;
   }
 
-  public String getResourceId() {
-    return resourceId;
+  public Map<String, List<Serializable>> getHistoryMetacard() {
+    return historyMetacardAttributes;
   }
 
-  public void setResourceId(String id) {
-    this.resourceId = id;
-  }
-
-  public String getTitle() {
-    return title;
-  }
-
-  public void setTitle(String title) {
-    this.title = title;
-  }
-
-  public String getCreated() {
-    return created;
-  }
-
-  public void setCreated(String created) {
-    this.created = created;
-  }
-
-  public String getCql() {
-    return cql;
-  }
-
-  public void setCql(String cql) {
-    this.cql = cql;
+  public void setHistoryMetacard(Map<String, List<Serializable>> historyMetacardAttributes) {
+    this.historyMetacardAttributes = historyMetacardAttributes;
   }
 }
