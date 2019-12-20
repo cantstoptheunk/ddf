@@ -370,8 +370,7 @@ public class MetacardApplication implements SparkApplication {
           List<HistoryResponse> historyResponses = new ArrayList<>();
 
           for (Metacard metacard : metacards) {
-            Map<String, List<Serializable>> metacardAttributes =
-                getHistoryMetacardAttributes(metacard);
+            Map<String, Object> metacardAttributes = getHistoryMetacardAttributes(metacard);
             historyResponses.add(
                 new HistoryResponse(
                     metacard.getId(),
@@ -898,17 +897,17 @@ public class MetacardApplication implements SparkApplication {
     exception(RuntimeException.class, util::handleRuntimeException);
   }
 
-  private Map<String, List<Serializable>> getHistoryMetacardAttributes(Metacard metacard) {
+  private Map<String, Object> getHistoryMetacardAttributes(Metacard metacard) {
     Set<AttributeDescriptor> attributeDescriptors =
         metacard.getMetacardType().getAttributeDescriptors();
 
-    Map<String, List<Serializable>> historyMetacardAttributes = new HashMap<>();
+    Map<String, Object> historyMetacardAttributes = new HashMap<>();
     for (AttributeDescriptor attDesc : attributeDescriptors) {
       String name = attDesc.getName();
       Attribute attribute = metacard.getAttribute(name);
 
-      if (attribute != null) {
-        List<Serializable> values = metacard.getAttribute(name).getValues();
+      if (attribute != null && !name.equals("metacard.version.type-binary")) {
+        Object values = metacard.getAttribute(name).getValues();
         if (values != null) {
           historyMetacardAttributes.put(name, values);
         }
