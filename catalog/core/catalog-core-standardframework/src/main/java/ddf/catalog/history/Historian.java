@@ -190,14 +190,14 @@ public class Historian {
       for (int i = 0; i < updateResponse.getUpdatedMetacards().size(); i++) {
         Attribute versionIdAttribute = response.getCreatedMetacards().get(i).getAttribute("id");
         updateResponse
-                .getUpdatedMetacards()
-                .get(i)
-                .getOldMetacard()
-                .setAttribute(versionIdAttribute);
+            .getUpdatedMetacards()
+            .get(i)
+            .getOldMetacard()
+            .setAttribute(versionIdAttribute);
       }
     } else {
       LOGGER.trace(
-              "Each updated metacard does not have a corresponding newly created versioned metacard.");
+          "Each updated metacard does not have a corresponding newly created versioned metacard.");
     }
 
     return updateResponse;
