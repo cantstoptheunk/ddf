@@ -383,6 +383,34 @@ public class MetacardApplication implements SparkApplication {
           return util.getJson(historyResponses);
         });
 
+      get(
+              "/history/label/:id",
+              (req, res) -> {
+                  String id = req.params(":id");
+                  List<Result> queryResponse = getMetacardHistory(id);
+                  if (queryResponse.isEmpty()) {
+                      res.status(204);
+                      return "[]";
+                  }
+
+                  List<Metacard> metacards =
+                          queryResponse.stream().map(Result::getMetacard).collect(Collectors.toList());
+
+                  List<HistoryResponse> historyResponses = new ArrayList<>();
+
+                  for (Metacard metacard : metacards) {
+                      Map<String, Object> metacardAttributes = getHistoryMetacardAttributes(metacard);
+                      historyResponses.add(
+                              new HistoryResponse(
+                                      metacard.getId(),
+                                      (String) metacard.getAttribute(MetacardVersion.EDITED_BY).getValue(),
+                                      (Date) metacard.getAttribute(MetacardVersion.VERSIONED_ON).getValue(),
+                                      metacardAttributes));
+                  }
+
+                  return util.getJson(historyResponses);
+              });
+
     get(
         "/history/add/:id/:revertid",
         (req, res) -> {

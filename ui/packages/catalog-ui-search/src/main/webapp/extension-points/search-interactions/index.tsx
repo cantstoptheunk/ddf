@@ -20,6 +20,7 @@ export {
   Icon,
   SearchFormMenuItem,
   ResetMenuItem,
+  SearchHistoryItem,
 } from './search-interactions.presentation'
 export {
   default as SearchInteractionContainer,

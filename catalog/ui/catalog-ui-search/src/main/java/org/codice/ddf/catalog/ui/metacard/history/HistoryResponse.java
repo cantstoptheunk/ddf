@@ -22,7 +22,7 @@ public class HistoryResponse {
 
   private Map<String, Object> attributes;
 
-  private String versionId, editedBy;
+  private String versionId, editedBy, label;
 
   public HistoryResponse(String versionId, String editedBy, Instant versioned) {
     this.versionId = versionId;
@@ -64,6 +64,14 @@ public class HistoryResponse {
 
   public void setEditedBy(String editedBy) {
     this.editedBy = editedBy;
+  }
+
+  public String getLabel() {
+    return label;
+  }
+
+  public void setLabel(String label) {
+    this.label = label;
   }
 
   public Map<String, Object> getAttributes() {
