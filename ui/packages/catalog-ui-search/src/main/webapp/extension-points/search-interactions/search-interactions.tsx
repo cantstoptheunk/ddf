@@ -33,10 +33,12 @@ export type SearchInteractionProps = {
   onHistoryClick: () => void
 }
 
-const SearchInteractions = (props2: SearchInteractionProps) => (
-  <SearchInteractionsContainer model={props2.model} 
-      onClose={props2.onClose} 
-      onHistoryClick={props2.onHistoryClick}>
+const SearchInteractions = (originalProps: SearchInteractionProps) => (
+  <SearchInteractionsContainer
+    model={originalProps.model}
+    onClose={originalProps.onClose}
+    onHistoryClick={originalProps.onHistoryClick}
+  >
     {(props: PresentationProps) => {
       return (
         <Menu onChange={(formId: string) => props.triggerQueryForm(formId)}>
@@ -61,7 +63,10 @@ const SearchInteractions = (props2: SearchInteractionProps) => (
           </MenuItem>
           <Divider />
           <ResetMenuItem value="reset" onClick={() => props.triggerReset()} />
-          <SearchHistoryItem value="searchHistory" onClick={() => (props2 as any).onHistoryClick()} />
+          <SearchHistoryItem
+            value="searchHistory"
+            onClick={() => (originalProps as any).onHistoryClick()}
+          />
         </Menu>
       )
     }}
