@@ -124,31 +124,3 @@ export const ResetMenuItem = ({
     </MenuItem>
   )
 }
-
-export const SearchHistoryItem = ({
-  value,
-  onClick,
-  active,
-  onHover,
-}: {
-  value: any
-  onClick: any
-  active?: any
-  onHover?: any
-}) => {
-  return (
-    <MenuItem
-      value={value}
-      title={`Search History`}
-      data-help={`Search History`}
-      onClick={onClick}
-      active={active}
-      onHover={onHover}
-    >
-      <Text>
-        <Icon className="fa fa-map" />
-        Search History
-      </Text>
-    </MenuItem>
-  )
-}

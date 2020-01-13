@@ -24,7 +24,6 @@ const ConfirmationView = require('../../component/confirmation/confirmation.view
 type Props = {
   model: any
   onClose: () => void
-  onHistoryClick: () => void
   children: (props: PresentationProps) => React.ReactNode
 } & WithBackboneProps
 
