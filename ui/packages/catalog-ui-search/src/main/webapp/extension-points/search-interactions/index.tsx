@@ -19,6 +19,7 @@ export {
   Divider,
   Icon,
   SearchFormMenuItem,
+  SearchHistoryItem,
   ResetMenuItem,
 } from './search-interactions.presentation'
 export {

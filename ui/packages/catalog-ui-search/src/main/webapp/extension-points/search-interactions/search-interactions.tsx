@@ -24,15 +24,21 @@ import {
   Divider,
   SearchFormMenuItem,
   ResetMenuItem,
+  SearchHistoryItem,
 } from './search-interactions.presentation'
 
 export type SearchInteractionProps = {
   model: any
   onClose: () => void
+  onHistoryClick: () => void
 }
 
-const SearchInteractions = (props: SearchInteractionProps) => (
-  <SearchInteractionsContainer model={props.model} onClose={props.onClose}>
+const SearchInteractions = (originalProps: SearchInteractionProps) => (
+  <SearchInteractionsContainer
+    model={originalProps.model}
+    onClose={originalProps.onClose}
+    onHistoryClick={originalProps.onHistoryClick}
+  >
     {(props: PresentationProps) => {
       return (
         <Menu onChange={(formId: string) => props.triggerQueryForm(formId)}>
@@ -57,6 +63,10 @@ const SearchInteractions = (props: SearchInteractionProps) => (
           </MenuItem>
           <Divider />
           <ResetMenuItem value="reset" onClick={() => props.triggerReset()} />
+          <SearchHistoryItem
+            value="searchHistory"
+            onClick={() => (originalProps as any).onHistoryClick()}
+          />
         </Menu>
       )
     }}
